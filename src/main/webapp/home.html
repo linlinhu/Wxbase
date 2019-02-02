@@ -1,0 +1,161 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+<title>Home</title>
+</head>
+<body>
+<div class="page-content">
+<div class="content-block-title">音频</div>
+<div class="content-block">
+<p class="buttons-row">
+  <a href="#" class="button" onclick = 'emin.wx.voice.start()'>录音</a>
+  <a href="#" class="button" onclick = 'stopVoice()'>结束录音</a>
+  <a href="#" class="button" onclick = 'translateVoice()'>翻译</a>
+</p>
+</div>
+<div class="content-block">
+<p class="buttons-row">
+  <a href="#" class="button" onclick = 'playVoice()'>播放</a>
+  <a href="#" class="button" onclick = 'uploadVoice()'>上传</a>
+  <a href="#" class="button" onclick = 'downloadVoice()'>下载</a>
+</p>
+</div>
+
+<div class="content-block-title">图片</div>
+<div class="content-block">
+<p class="buttons-row">
+  <a href="#" class="button" onclick = 'chooseImgs()'>选择</a>
+  <a href="#" class="button" onclick = 'previewImgs()'>预览</a>
+  <a href="#" class="button" onclick = 'uploadImgs()'>上传</a>
+  <a href="#" class="button" onclick = 'downloadImgs()'>下载</a>
+</p>
+</div>
+
+
+<div class="content-block-title">地理位置的获取</div>
+<div class="content-block">
+<p class="buttons-row">
+  <a href="#" class="button" onclick = 'getLocation()'>获得公司地址</a>
+  <a href="#" class="button" onclick = 'openLocation()'>打开公司地址</a>
+</p>
+</div>
+<div class="content-block-title">右上角菜单的显示和隐藏</div>
+<div class="content-block">
+<p class="buttons-row">
+  <a href="#" class="button" onclick = 'emin.wx.setMenuItems("show")'>显示</a>
+  <a href="#" class="button" onclick = 'emin.wx.setMenuItems("hide")'>隐藏</a>
+  <a href="#" class="button" onclick = 'emin.wx.setMenuItems("showNoneBase")'>显示非基本</a>
+  <a href="#" class="button" onclick = 'emin.wx.setMenuItems("hideNoneBase")'>隐藏非基本</a>
+</p>
+</div>
+
+<div class="content-block-title">菜单[在Safari中打开]的显示和隐藏</div>
+<div class="content-block">
+<p class="buttons-row">
+  <a href="#" class="button" onclick = 'emin.wx.setMenuItems("show", ["menuItem:openWithSafari"])'>显示</a>
+  <a href="#" class="button" onclick = 'emin.wx.setMenuItems("hide", ["menuItem:openWithSafari"])'>隐藏</a>
+</p>
+</div>
+
+<div class="content-block-title">微信扫码</div>
+<div class="content-block">
+<p class="buttons-row">
+  <a href="#" class="button" onclick = 'scanCode(0)'>扫二维码</a>
+  <a href="#" class="button" onclick = 'scanCode(1)'>扫条码</a>
+  <a href="#" class="button" onclick = 'scanCode(2)'>返回扫码结果</a>
+</p>
+</div>
+</div>
+</body>
+<script> var wxConfig = JSON.parse('${wxConfig}'); </script>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+<script src="js/jquery-2.1.1.min.js"></script>
+<script src="js/emin/emin.wechat.js"></script>
+<script type="text/javascript">
+var localId = '',serverId = '';
+function stopVoice() {
+	emin.wx.voice.stop(function(res){
+		localId = res;
+	})
+}
+
+function translateVoice() {
+	emin.wx.voice.translate(localId, function(res) {
+		alert(res);
+	});
+}
+
+function playVoice() {
+	emin.wx.voice.play(localId);
+}
+
+function uploadVoice() {
+	emin.wx.voice.upload(localId, function(res){
+		if(res) {
+			serverId = res;
+			alert('上传成功');
+		}
+	});
+}
+
+function downloadVoice() {
+	emin.wx.voice.download(serverId, function(res){
+		if(res) {
+			localId = res;
+			alert('下载成功');
+		}
+	});
+}
+
+var imgLocalIds = [], imgServerIds = [];
+function chooseImgs() {
+	emin.wx.images.choose(function(res) {
+		imgLocalIds = res;
+		alert('你选择了' + imgLocalIds.length + '张图片');
+	})
+}
+
+function previewImgs() {
+	emin.wx.images.preview(imgLocalIds, 0);
+}
+
+
+function uploadImgs() {
+	emin.wx.images.upload(imgLocalIds);
+	imgServerIds = emin.wx.images.serverIds;
+}
+
+
+function downloadImgs() {
+	emin.wx.images.download(imgServerIds);
+	imgLocalIds = emin.wx.images.localIds;
+}
+
+function getLocation() {
+	emin.wx.location.get(function(res) {
+		alert('您的位置信息:' + JSON.stringify(res));
+	});
+}
+
+function openLocation() {
+	emin.wx.location.open({latitude: 30.56017, longitude: 104.0549});
+}
+
+function scanCode(f) {
+	switch(f) {
+	case 0:
+		emin.wx.scanCode(0, ['qrCode']);
+		break;
+	case 1:
+		emin.wx.scanCode(0, ['barCode']);
+		break;
+	case 2:
+		emin.wx.scanCode(1, ['qrCode', 'barCode'], function(res) {
+			alert(res);
+		});
+		break;
+	}
+}
+</script>
+</html>

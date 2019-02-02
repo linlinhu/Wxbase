@@ -1,0 +1,350 @@
+<div class="wrapper-content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>图文库-<#if wxArticle??>修改<#else>添加</#if></h5>
+                    <div class="ibox-tools">
+                        <a class="btn btn-white btn-bitbucket btn-xs" href="javascript: goPage('index')">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+               		 <form method="get" class="form-horizontal" id="wxArticleForm">
+               		 	<input type="hidden" name="id" value="">
+               		 	<input type="hidden" name="woaId" value="${woaId}">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">类型</label>
+                            <div class="col-sm-10">
+								<label class="radio i-checks inline">
+                                   	<input type="radio" value="1" name="size">大图(建议比例：5/4)&nbsp;&nbsp;
+                               	</label>
+                               	<label class="radio i-checks inline">
+                                   	<input type="radio" value="2" name="size">小图(建议比例：1/1)&nbsp;&nbsp;
+                               	</label>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">图片路径</label>
+                            <div class="col-sm-10">
+								<input class="form-control" type="text" name="picUrl" readonly onclick="bindPicUrl()">
+								<img class="form-img hide" src="">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">标题</label>
+                            <div class="col-sm-10">
+								<input class="form-control" type="text" name="title">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">链接</label>
+                            <div class="col-sm-10">
+								<input class="form-control" type="text" name="url">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">描述</label>
+                            <div class="col-sm-10">
+								<textarea class="form-control" name="description" rows="5"></textarea>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" type="submit">保存内容</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="hide" id="waImgResources">
+	<div style="display: block; margin: 10px 0 0 10px;"><a flag="uploadPics" href="javascript: void(0)"><i class="fa fa-cloud-upload">&nbsp;上传图片</i></a></div>
+	<script id="wxImgsTPL" type="text/html">
+		{{# if(d && d.resultList && d.resultList.length > 0) { }}
+		{{# layui.each(d.resultList, function(index, item){}}
+		<li data-id="{{item.id}}">
+	        <img alt="image" src="{{item.path}}" title="{{item.name}}"/>
+	        <div class="opers">
+	        	<a flag="toggleSelect"><i class="fa fa-check-square-o">&nbsp;设置选中</i></a>&nbsp;
+	        	<a flag="remove"><i class="fa fa-remove">&nbsp;删除</i></a>
+	        </div>
+	        <div class="check-wrap">
+	        	<i class="fa fa-check"></i>
+	        </div>
+	    </li>
+		{{# });}}
+		{{# } }}
+	</script>
+	<ul class="img-list" id="wxImgs-view"></ul>
+	<div id="wxImgsPage"></div>
+</div>
+
+<script>
+	var woaId = '${woaId}';
+	
+	<#if wxArticle??>
+	$('#wxArticleForm input[name="id"]').val('${wxArticle.id}');
+	if ('${wxArticle.size}' == 2) {
+		$($('#wxArticleForm input[name="size"]')[1]).attr('checked', true);
+	} else {
+		$($('#wxArticleForm input[name="size"]')[0]).attr('checked', true);
+	}
+	$('#wxArticleForm input[name="title"]').val('${wxArticle.title}');
+	$('#wxArticleForm input[name="picUrl"]').val('${wxArticle.picUrl}');
+	$('#wxArticleForm input[name="picUrl"]').siblings('img').removeClass('hide');
+	$($('#wxArticleForm input[name="picUrl"]').siblings('img')[0]).attr('src', '${wxArticle.picUrl}')
+	$('#wxArticleForm input[name="url"]').val('${wxArticle.url}');
+	$('#wxArticleForm textarea[name="description"]').val('${wxArticle.description}');
+	<#else>
+	$($('#wxArticleForm input[name="size"]')[0]).attr('checked', true);
+	</#if>
+
+	$('.i-checks').iCheck({
+	    checkboxClass: 'icheckbox_square-green',
+	    radioClass: 'iradio_square-green',
+	});
+	
+	$("#wxArticleForm").validate({
+        rules: {
+        	picUrl: {
+                required: true,
+        	},
+        	title: {
+                required: true,
+                rangelength: [1,20]
+            },
+            url: {
+                required: true,
+                isHref: true
+            }
+        },
+        messages: {
+        	picUrl: {
+                required: icon + "请选择一张图片"
+            },
+        	title: {
+                required: icon + "请输入标题",
+                rangelength: icon + "标题输入长度必须介于1和20之间"
+            },
+        	url: {
+                required: icon + "请输入链接，该链接在微信公众号平台素材库生成"
+            }
+        },
+        submitHandler:function(form){
+        	var submitObj = $("#wxArticleForm").serializeObject(),
+        		params = {};
+        	
+        	params = {
+       			jsonStr: JSON.stringify(submitObj),
+       			history: true
+        	};
+        	
+        	save(params, 'wxArticle');
+        } 
+	});
+	
+	function uploadWaImgResources() {
+		
+		var html =  '<div id="uploadInterface" style="z-index:999;">'+
+						'<div class="webuploader" id="waImgResourcesUploader">'+
+							$('#webuploaderTPL').html() +
+					    '</div>'+
+					'</div>',
+			uploadPics = [],
+			saveSuccessCount = 0;
+					
+			layer.open({
+				type : 1,
+				title : '上传图片资源',
+				skin : 'layui-layer-rim', //加上边框
+				area : [ '60%', '450px' ], //宽高
+				content : '<div class="wrapper-content">' + html + '</div>',
+				btn : [ '确定'],
+				yes : function(lindex, layero) {
+					if (uploadPics.length == 0) {
+						layer.msg('请上传至少一张图片后再点击此按钮', {icon: 5});
+						return false;
+					}
+
+					$.ajaxSettings.async = false;
+					for (i = 0; i < uploadPics.length; i++) {
+						saveWaImgResource(uploadPics[i], function(success) {
+							if (success) {
+								saveSuccessCount++;
+							} else {
+								return false;
+							}
+						});
+					}
+					$.ajaxSettings.async = true;
+					if (saveSuccessCount == uploadPics.length) {
+						layer.msg('所有图片已成功的保存到资源库！', {icon: 6});
+						layer.close(lindex);
+						bindPicUrl();
+					}
+				}
+			});
+			
+			CUploadFiles({
+				uploaderId: 'waImgResourcesUploader',
+				filesType: ['img'],
+				uploadUrl: '/file/upload.do',
+				fileNumLimit: 10
+			}, function(file, response){
+				var normalPic = response.result.storage[2];
+				
+				uploadPics.push({
+					name: normalPic.fileStorageUrl,
+					path: normalPic.fileStorageUrl,
+					size: normalPic. available,
+					woaId: woaId
+				})
+			})
+	}
+	
+	function saveWaImgResource(params, callback) {
+		ajaxRequest({
+			url: base + 'wxImg/add',
+			data: params
+		}, function(res) {
+			if (typeof res == 'string') {
+				res = JSON.parse(res);
+    		}
+			if (!res.success) {
+				layer.msg("将图片保存到资源库的过程中发生错误！" + (res.message ? "错误提示：" + res.message : ""), {icon: 5});
+				callback(false);
+			} else {
+				callback(true);
+			}
+		})
+	}
+	function deleteWaImgResource(id, callback) {
+		ajaxRequest({
+			url: base + 'wxImg/delete',
+			data: {
+				id: id
+			}
+		}, function(res) {
+			if (typeof res == 'string') {
+				res = JSON.parse(res);
+    		}
+			if (!res.success) {
+				layer.msg("删除图片失败！" + (res.message ? "错误提示：" + res.message : ""), {icon: 5});
+			} else {
+				callback();
+			}
+		})
+	}
+	
+	function pageWaImgResources(cur, limit) {
+		ajaxRequest({
+			url: base + 'wxImg/getPage',
+	    	data: {
+	    		limit: limit, // 默认每页展示10个
+	    		page: cur, 
+	    		woaId: woaId
+	    	}
+		}, function(data) {
+			if (typeof data == 'string') {
+    			data = JSON.parse(data);
+    		}
+			if (!data.success){
+    			layer.msg('图片资源加载失败！' + data.message ? '原因可能是：' + data.message : '', {icon: 5});
+    		} else {
+    			var tpl = wxImgsTPL.innerHTML,//数据模板
+    				view = $('#wxImgs-view'),
+    				totalPage = data.result.totalPageNum,
+    				totalCount = data.result.totalCount,
+					cur = data.result.currentPage,
+					limit = data.result.limit;
+    			
+				laytpl(tpl).render(data.result, function(html){
+					view.html(html);
+					//设置选中
+					$('#waImgResources li a[flag="toggleSelect"]').click(function(){
+						var parentLi = $(this).parent().parent();
+						parentLi.siblings('li').removeClass('selected');
+						parentLi.toggleClass('selected');
+					});
+					//删除
+					$('#waImgResources li a[flag="remove"]').click(function(){
+						var parentLi = $(this).parent().parent(),
+							dataId = $(parentLi).attr('data-id');
+
+						layer.confirm('是否确认删除该图片？',function(confirmIndex){
+							layer.close(confirmIndex);
+							deleteWaImgResource(dataId, function(){
+								$(parentLi).remove();
+							});
+						});
+						
+					});
+					if(totalPage > 0) {
+						pageList({
+							modelName: 'wxImgs',
+							totalCount: totalCount,
+							limit: limit,
+							curr: cur
+						}, function(obj) {
+							pageWaImgResources(obj.curr, obj.limit);
+						})
+					}
+				});
+    		}
+		});
+	}
+	function bindPicUrl() {
+		$.ajaxSettings.async = false;
+		pageWaImgResources(1, 10);
+		$.ajaxSettings.async = true;
+		$('#waImgResources').removeClass('hide');
+		layer.open({
+			type : 1,
+			title : '图片资源库',
+			skin : 'layui-layer-rim', //加上边框
+			area : [ '863px', '450px' ], //宽高
+			content : $('#waImgResources'),
+			btn : [ '确定'],
+			yes: function(lindex, layero) {
+				var selectedPic = $('#waImgResources li.selected'),
+					picUrl = selectedPic.length == 1 ? selectedPic.find('img').attr('src') : '';
+				
+
+				if (picUrl == '') {
+					layer.msg('请设置选中一张图片后再点击此按钮', {icon: 5});
+					return false;
+				}
+				
+				$('#wxArticleForm input[name="picUrl"]').val(picUrl);
+				$('#wxArticleForm input[name="picUrl"]').siblings('img').removeClass('hide');
+				$($('#wxArticleForm input[name="picUrl"]').siblings('img')[0]).attr('src', picUrl)
+				layer.close(lindex);
+				
+			}
+		});
+		setTimeout(function(){
+			layer.photos({
+		        photos: '#waImgResources',
+		        shade: [0.3, '#293846']
+		    });
+			//上传图片
+			$('#waImgResources a[flag="uploadPics"]').click(function(){
+				layer.closeAll();
+				uploadWaImgResources();
+			});
+			
+		})
+	}
+	
+	
+	
+</script>

@@ -1,0 +1,267 @@
+<div class="wrapper-content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>
+                    	关键字回复-
+                    <#if keyReply??>
+                    	编辑
+                    <#else>
+                    	添加
+                    </#if>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="btn btn-white btn-bitbucket btn-xs" href="javascript: goPage('index?limit=8')">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+               		 <form method="get" class="form-horizontal" id="keyReplyForm">
+               		 	<input type="hidden" name="id">
+               		 	<input type="hidden" name="woaId" value="${woaId}">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">关键字</label>
+                            <div class="col-sm-10">
+								<input class="form-control" type="text" name="keyword">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">描述</label>
+                            <div class="col-sm-10">
+								<input class="form-control" type="text" name="remark">
+                            </div> 
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">回复类型</label>
+                            <div class="col-sm-10">
+                            	<label class="radio i-checks inline">
+                            		<input type="radio" checked value="news" name="replyType">图文
+                           		</label>
+								<label class="radio i-checks inline">
+									<input type="radio"  value="text" name="replyType"> 文本
+                                </label>
+                            </div> 
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group newsContainer">
+                        	<label class="col-sm-2 control-label"></label>
+                            <div class="col-sm-10">
+                            	<input type="hidden" name="articleIds">
+                            	<div id="articles-opers">
+	                            	<a href="javascript:openChooseArticlesPanel()"><i class="fa fa-plus">&nbsp;添加</i></a>&nbsp;
+                            	</div>
+                            	<div class="hide articles-show" id="articles-view"></div>
+                            	<script id="articlesTPL" type="text/html">
+									{{# if(d && (d.first || d.subs.length > 0)) { }}
+									<ul class="walist reply-view">
+									{{# if(d.first) { }}
+									<li class="type_{{d.first.size}}">
+										<div class="wa-title">{{d.first.title}}</div>
+										<img class="wa-img" src="{{d.first.picUrl}}"/>
+									</li>
+									{{# } }}
+									{{# if(d.subs && d.subs.length > 0) { }}
+									{{# layui.each(d.subs, function(index, item){ }}
+									<li class="type_{{item.size}}">
+										<div class="wa-title">{{item.title}}</div>
+										<img class="wa-img" src="{{item.picUrl}}"/>
+									</li>
+									{{# });}}
+									{{# } }}
+									</ul>
+									<div class="text-center" style="margin-top: 15px">
+									<button class="btn btn-defult btn-circle btn-lg" type="button" title="重置" alt="重置" onclick="articlesOpersShow()"><i class="fa fa-refresh"></i></button>
+									</div>
+									{{# } }}
+								</script>
+                            </div> 
+                        </div>
+                        <div class="form-group textContainer hide">
+	                            <label class="col-sm-2 control-label">文本内容</label>
+	                            <div class="col-sm-10">
+									<textarea class="form-control" name="content">${keyReply.content}</textarea>
+	                            </div>                        	
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">是否作为提示项</label>
+                            <div class="col-sm-10">
+                                     <label class="radio i-checks inline type">
+                                         <input type="radio" checked value=true name="preferences"> 是
+                                     </label>
+                                     <label class="radio i-checks inline type">
+                                         <input type="radio"  value=false name="preferences"> 否
+                                     </label>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" type="submit">保存内容</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+var woaId = '${woaId}';
+<#if keyReply??>
+	$('#keyReplyForm input[name="id"]').val('${keyReply.id!""}');
+	$('#keyReplyForm input[name="keyword"]').val('${keyReply.keyword!""}');
+	$('#keyReplyForm input[name="remark"]').val('${keyReply.remark!""}');
+	if ('${keyReply.replyType}' == 'news') {
+		$($('#keyReplyForm input[name="replyType"]')[0]).attr('checked', true);
+		<#if keyReply.articles??>
+			var articles = {
+					first: null,
+					subs: []
+				};
+			<#list keyReply.articles as a>
+				var cur = {
+						id: '${a.id}',
+						title: '${a.title}',
+						size: '${a.size}',
+						picUrl: '${a.picUrl}'
+					};
+				if ('${a.size}' == '1') {
+					articles.first = cur;
+				} else {
+					articles.subs.push(cur);
+				}
+			</#list>
+			articlesDatasShow(articles);
+		</#if>
+	} else {
+		$($('#keyReplyForm input[name="replyType"]')[1]).attr('checked', true);
+	}
+	
+	showReplyTypeContainer('${keyReply.replyType}');
+	
+	<#if keyReply.preferences >
+		$($('#keyReplyForm input[name="preferences"]')[0]).attr('checked', true);
+	<#else>
+		$($('#keyReplyForm input[name="preferences"]')[1]).attr('checked', true);
+	</#if>
+</#if>
+$('.i-checks').iCheck({
+    checkboxClass: 'icheckbox_square-green',
+    radioClass: 'iradio_square-green',
+});
+$('input[name="replyType"]').on('ifChecked', function(event){
+	var replyType = event.currentTarget.value;
+	
+	showReplyTypeContainer(replyType);
+})
+
+function showReplyTypeContainer(rt) {
+	var newsContent = $('#keyReplyForm  .newsContainer'),
+		textContent = $('#keyReplyForm  .textContainer');
+	
+	rt = rt ? rt : 'news';
+	
+	if (rt == 'news') {
+		newsContent.removeClass('hide');
+		if (!textContent.hasClass('hide')) {
+			textContent.addClass('hide');
+		}
+	} else {
+		if (!newsContent.hasClass('hide')) {
+			newsContent.addClass('hide');
+		}
+		textContent.removeClass('hide');
+	}
+}
+
+$("#keyReplyForm").validate({
+	rules: {
+		keyword: {
+	        required: true,
+	        rangelength: [1,10]
+	    },
+	    remark: {
+	        rangelength: [1,50]
+	    }
+	},
+	messages: {
+		keyword: {
+	        required: icon + "请输入关键字",
+	        rangelength: icon + "标题的输入长度必须介于1和10之间"
+	    },
+	    remark: {
+	        rangelength: icon + "描述信息的输入长度必须介于1和50之间"
+	    }
+	},
+	submitHandler: function(){
+		var submitObj = $('#keyReplyForm').serializeObject(),
+	    	articleIds = submitObj.articleIds;
+	
+	    delete submitObj.articleIds;
+	    if (submitObj.replyType == 'news') {
+	    	if (articleIds == '') {
+		    	layer.msg('请配置图文回复内容', {icon: 5});
+		    	return false;
+	    	}
+	    	
+	    	submitObj.content = '';
+	    }
+	    
+	    if (submitObj.replyType == 'text'){
+	    	if(submitObj.content == '') {
+	    		layer.msg('请输入文本回复内容', {icon: 5});
+		    	return false;
+	    	}
+	    	articleIds = '';
+	    } 
+		save({
+			jsonStr: JSON.stringify(submitObj),
+			articleIds: articleIds,
+   			history: true
+		}, 'keyReply')
+	}
+});
+function articlesOpersShow() {
+	$('#articles-opers').removeClass('hide');
+	$('#articles-view').html('').addClass('hide');
+}
+
+function articlesDatasShow(datas) {
+	var tpl = articlesTPL.innerHTML,
+		view = $('#articles-view'),
+		ids = '';
+	
+	ids = datas.first.id;
+	for (i = 0; i < datas.subs.length; i++) {
+		ids += ',' + datas.subs[i].id;
+	}
+	$('#keyReplyForm input[name="articleIds"]').val(ids);
+	$('#articles-opers').addClass('hide');
+	laytpl(tpl).render(datas, function(html){
+		view.html(html).removeClass('hide');
+	});
+}
+
+function openChooseArticlesPanel() {
+	openArticlesReplyConfigPanel({
+		woaId: woaId
+	}, function(flag, datas) {
+		var tpl = articlesTPL.innerHTML,
+			view = $('#articles-view');
+		
+		if (flag == 'reset') {
+			articlesOpersShow();
+		}
+		
+		if (flag == 'configed') {
+			articlesDatasShow(datas);
+		}
+	})
+}
+
+</script>

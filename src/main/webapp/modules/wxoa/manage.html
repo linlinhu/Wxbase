@@ -1,0 +1,74 @@
+<style>
+	.devicesMsg{
+		padding:2px;
+		margin-right:15px;
+		background:#DADADA;
+	}
+</style>
+<#setting datetime_format='yyyy-MM-dd HH:mm:ss'>
+<#setting date_format='yyyy-MM-dd'>
+<div class="wrapper-content">
+	<div class="row">
+		<div class="col-sm-12">
+		    <div class="ibox float-e-margins">
+		        <div class="ibox-title">
+		            <h5>微信公众号管理</h5>
+		            <div class="ibox-tools">
+		                <a class="btn btn-primary" href="javascript:goPage('form')" alt="添加微信公众号" title="添加微信公众号">
+		                    <i class="fa fa-plus"></i>
+		                </a>
+		            </div>
+		        </div>
+		        <div class="ibox-content">
+		        	<div class="filter-line">
+	                	<form method="get" class="dr-search-form" id="wxoaSearchForm">
+							<input type="hidden" name="page">
+                            <input placeholder="关键字查询" class="form-control" type="text" name="keyword" value="${keyword!''}" role="user-params">
+                            <button type="button" class="btn btn-primary" role="submit"><i class="fa fa-search"></i></button>
+                            <button type="button" class="btn btn-default" role="reset"><i class="fa fa-refresh"></i></button>
+	                 	</form>
+	                </div>
+		            <table class="footable table table-stripped toggle-arrow-tiny" id="wxoaTable" data-paging="false">
+		                <thead>
+		                        <tr>
+		                            <th data-toggle="true">企业名称</th>
+		                            <th>微信号</th>
+		                            <th>类型</th>
+		                            <th>appId</th>
+		                            <th>appSecret</th>
+		                            <th>Token</th>
+		                            <th data-sort-ignore="true">操作</th>
+		                        </tr>
+		                    </thead>
+		                    <tbody>
+		                    	<#if result?? &&  result?size gt 0>
+		                    	<#list result as d>
+		                    		<tr>
+		                    			<td>${d.companyName}</td>
+			                        	<td>${d.companyCode}</td>
+			                        	<td><#if d.type==1>订阅<#elseif d.type==2>服务<#elseif d.type==3>企业<#else>小程序</#if></td>
+			                        	<td>${d.appId}</td>
+			                        	<td>${d.appSecret}</td>
+			                        	<td>${d.token}</td>
+			                        	<td>
+			                        	<#if d.status == 1>
+		                        		<a href="javascript: goPage('form?id=${d.id}')" alt="编辑" title="编辑"><i class="fa fa-pencil text-navy">&nbsp;</i></a>&nbsp;
+	                                    <a href="javascript: setStatus('wxoa', '${d.id}', 1);" alt="禁用" title="禁用"><i class="fa fa-minus-circle text-navy">&nbsp;</i></a>&nbsp;
+		                        		<#else>
+		                        		<a href="javascript: setStatus('wxoa', '${d.id}', 0);" alt="启用" title="启用"><i class="fa fa-play-circle text-navy">&nbsp;</i></a>&nbsp;
+		                        		</#if>
+			                        	</td>
+		                        	</tr>
+		                        </#list>
+		                        <#else>
+		                        <tr>
+		                        	<td colspan="7">暂无数据</td>
+		                        </tr>
+		                        </#if>
+		                    </tbody>
+		            </table>
+		        </div>
+		    </div>
+		</div>
+	</div>
+</div>

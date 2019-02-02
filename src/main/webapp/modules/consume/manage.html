@@ -1,0 +1,141 @@
+
+<#setting datetime_format='yyyy-MM-dd HH:mm:ss'>
+<#setting date_format='yyyy-MM-dd'>
+<style>
+	.searchDiv {
+		padding:5px 0!important;
+	}
+	.searchDiv input {
+		width:274px!important;
+	}
+	#consumeTreeWrap{
+		top:103px!important;
+		left:35px!important;
+	}
+</style>
+<div class="wrapper-content">
+	<div class="row">
+		<div class="col-sm-12">
+		    <div class="ibox float-e-margins">
+		        <div class="ibox-title">
+		            <h5>核销记录</h5>
+		        </div>
+		        <div class="ibox-content">
+		        	<div class="filter-line">
+	                	<form method="get" class="dr-search-form" id="consumeSearchForm">
+	                		<div class="col-sm-12 searchDiv">
+	                			<input type="hidden" name="page">
+	                			<input type="hidden" name="ecmIds" value="${ecmIds!''}" role="user-params">
+                            	<input id="consumeTreeFilter" placeholder="核销点查询" class="form-control" type="text" name="ecmIdName" value="${ecmIdName!''}" role="user-params" readOnly>
+                            	<input placeholder="奖品名称查询" class="form-control" type="text" name="awardName" value="${awardName!''}" role="user-params">
+	                			<#if startTime?? && startTime?length gt 0>
+                            	 <input placeholder="核销日期" class="laydate-icon form-control layer-date" type="text" name="consumeTime" id="consumeRecordDate" value="${startTime?number_to_date} - ${endTime?number_to_date}" role="user-params">
+                           		<#else>
+                           		 <input placeholder="核销日期" class="laydate-icon form-control layer-date" type="text" name="consumeTime" id="consumeRecordDate" value="" role="user-params">
+                            	</#if>
+                            	<button type="button" class="btn btn-primary submit" onclick="search()">搜索</button>
+                            	<button type="button" class="btn btn-default" role="reset"><i class="fa fa-refresh"></i></button>
+	                		</div>
+	                 	</form>
+	                </div>  
+		            <table class="footable table table-stripped toggle-arrow-tiny" id="awardRecordTable" data-page-size="${page.limit!10}" data-paging="false">
+		                <thead>
+							<tr>
+								<th data-toggle="true">序号</th>
+								<th>活动名称</th>
+								<th>核销点</th>
+								<th>核销时间</th>
+								<th>核销奖品</th>
+								<th>核销人</th>
+							</tr>
+						</thead>
+						<tbody>
+							<#if page?? && page.totalCount gt 0>
+	                    	<#list page.resultList as d>
+	                    		<tr>
+	                    			<td>${(page.currentPage -1) * page.pageSize + d_index + 1 }</td>
+	                    			<td>${d.wxActivityName}</td>
+	                    			<td>${d.consumerInfo.ecm.name}</td>
+		                        	<td>${d.createTime?number_to_datetime}</td>
+		                        	<td>${d.awardInfo.name}</td>
+		                        	<td>
+		                        	<#if d.consumerInfo.person.realName?? && d.consumerInfo.person.realName?length gt 0>
+		                        		${d.consumerInfo.person.realName}
+		                        	<#else>
+		                        		${d.consumerInfo.person.mobile}
+		                        	</#if>
+		                        	</td>
+	                        	</tr>
+							</#list>
+	                        <#else>
+	                        <tr>
+	                        	<td colspan="6">暂无数据</td>
+	                        </tr>
+	                        </#if>
+						</tbody>
+		            </table>
+		            <div class="text-right" id="consumePage"></div>
+		            <div class="ztree-wrap" id="consumeTreeWrap" style="">
+						<input class="search" id="consumeTreeKey" placeholder="类名模糊查询">
+						<ul id="consumeTree" class="ztree"></ul>
+					</div>
+		        </div>
+		    </div>
+		</div>
+	</div>
+</div>
+<script>
+<#if page??>
+initTable({
+	modelName: 'consume',
+	curr: '${page.currentPage!1}',
+	totalPage: '${page.totalPageNum!1}',
+	totalCount: '${page.totalCount!1}',
+	limit: '${page.limit!10}'
+});
+</#if>
+var consumeRecordDate = {
+		elem: '#consumeRecordDate', //指定元素
+		format: 'yyyy-MM-dd',
+		min: '2000-06-16', 
+        max: 0,
+		theme: '#5a98de',
+		range: true,
+		done: function (value, date) {
+			
+	    }
+	};
+laydate.render(consumeRecordDate);
+
+function search(){
+	var searchParams = $('#consumeSearchForm').serializeObject(),
+		params = {},
+		consumeTime = searchParams.consumeTime?searchParams.consumeTime.split(' - '):null;
+	
+	params = {
+			ecmIds:searchParams.ecmIds,
+			ecmIdName:searchParams.ecmIdName,
+			awardName:searchParams.awardName,
+			startTime: consumeTime?(new Date((consumeTime[0]+' 00:00:00'))).getTime():'',
+			endTime: consumeTime?(new Date((consumeTime[1]+' 23:59:59'))).getTime():'',
+			limit:10
+	}
+	goPage('index', params);
+}
+
+treeDisplay('consumeTree');
+eminZtree({
+	id: 'consumeTree',
+	async: {
+		enable: true,
+		url: '${base}consume/findTree',
+		otherParam: { "eid":"1", "ename":"test"},
+		expandAll: false
+	}
+},function(ztree, treeNode){
+	$('#consumeTreeWrap').hide();
+	$('#consumeTreeFilter').val(treeNode.name);
+	$('input[name="ecmIds"]').val(treeNode.ecmId)
+	console.log(treeNode.name,treeNode.ecmId);
+});
+</script>

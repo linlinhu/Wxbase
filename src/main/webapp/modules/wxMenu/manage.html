@@ -1,0 +1,167 @@
+<#setting datetime_format='yyyy-MM-dd HH:mm:ss'>
+<#setting date_format='yyyy-MM-dd'>
+<link rel="stylesheet" type="text/css" href="${base}/css/modules/wxMenu/index.css" /> 
+<div class="wrapper-content">
+	<div class="row">
+		<div class="col-sm-12">
+		    <div class="ibox float-e-margins">
+		        <div class="ibox-title">
+		            <h5>自定义菜单配置管理</h5>
+		            <div class="ibox-tools hide" id="wxmenuAdd">
+		                <a class="btn btn-primary" href="javascript:goPage('form')" alt="添加自定义菜单配置" title="添加自定义菜单配置">
+		                    <i class="fa fa-plus"></i>
+		                </a>
+		            </div>
+		        </div>
+		        <div class="ibox-content">
+		        	<div class="menu_setting_area js_editBox"> 
+					   	<div class="menu_preview_area"> 
+					    	<div class="mobile_menu_preview"> 
+					     		<div class="mobile_hd tc" onclick="toggleWxoaUlsDisplay(this)"><span id="wxMenu-woaName">请选择公众号</span>&nbsp;<i class="fa fa-angle-down"></i></div>
+					     		<ul class="dropDown-list hide" id="wxMenuManage-woalist">
+					     			<#list woaList as w>
+					     			<li data-id="${w.id}" class="selected" onclick="setWxoaSelected(this)">${w.companyName}</li>
+					     			</#list>
+					     		</ul>
+					     		<div class="mobile_bd">
+									<script id="wxMenuListDatas" type="text/html">
+									{{# if(d && d.length > 0) { 
+										var menuSize = d.length;
+										menuSize = menuSize < 3 ? menuSize + 1 : menuSize;}}
+									{{# layui.each(d, function(index, item){ 
+										var subMenus = item.subMenus;
+									}}
+									<li class="jsMenu pre_menu_item grid_item jslevel1 ui-sortable ui-sortable-disabled size1of{{menuSize}}" id="menu_{{item._index}}">
+					       				<a href="javascript:void(0);" class="pre_menu_link" draggable="false" onclick="editWxMenu({{item._index}})">
+											{{# if(item.id){ }}
+						       				<i class="icon_menu_dot js_icon_menu_dot dn"></i>
+											{{# } }}
+						       				<span class="js_l1Title">{{item.name}}</span>
+					       				</a> 
+					        			<div class="sub_pre_menu_box js_l2TitleBox"> 
+					         			<ul class="sub_pre_menu_list">
+											{{# if(subMenus && subMenus.length > 0) { var subMenuSize = subMenus.length;}}
+											{{# layui.each(item.subMenus, function(sub_index, sub_item){ }} 
+					          				<li class="jslevel2" id="subMenu_{{item._index}}{{sub_item._index}}">
+						          				<a href="javascript:void(0);" class="jsSubView" draggable="false" onclick="editWxMenu({{item._index}}, {{sub_item._index}})">
+						          					<span class="sub_pre_menu_inner js_sub_pre_menu_inner">
+						          						<i class="icon20_common sort_gray"></i>
+						          						<span class="js_l2Title">{{sub_item.name}}</span>
+						          					</span>
+						          				</a>
+					          				</li>
+											{{# }); }}
+											{{# } }}
+
+											{{# if(subMenus && subMenus.length < 5) { }}
+					          				<li class="js_addMenuBox">
+					          					<a href="javascript:void(0);" class="jsSubView js_addL2Btn" title="最多添加5个子菜单" draggable="false" onclick="addWxMenu({{item._index}})">
+					          					<span class="sub_pre_menu_inner js_sub_pre_menu_inner">
+					          						<i class="icon14_menu_add"></i>
+					          					</span>
+					          					</a>
+					          				</li> 
+											{{# } }}
+					         			</ul> 
+					         			<i class="arrow arrow_out"></i><i class="arrow arrow_in"></i> 
+					        			</div>
+					        		</li>	
+									{{# }); }}
+
+									{{# } }}
+
+									{{# if(d && d.length < 3) { }}
+					        		<li class="js_addMenuBox pre_menu_item grid_item no_extra size1of{{d.length + 1}}">
+					        			<a href="javascript:void(0);" class="pre_menu_link js_addL1Btn" title="最多添加3个一级菜单" draggable="false" onclick="addWxMenu()">
+					        				<i class="icon14_menu_add"></i>
+											{{# if(d && d.length == 0) { }}
+												添加菜单
+											{{# } }}
+					        			</a>
+					        		</li>
+									{{# } }}
+									</script>
+					      			<ul class="pre_menu_list grid_line ui-sortable ui-sortable-disabled" id="wxMenuList"></ul> 
+					     		</div> 
+					    	</div> 
+					   </div> 
+					   <div class="menu_form_area" id="wxMenuEditBox"></div> 
+					   <script id="wxMenuEditBoxData"  type="text/html"> 
+								{{# if(d && !d.empty) { 
+									var removeIdStr = '';
+									if (typeof d.pindex != 'undefined') {
+										removeIdStr = d.pindex + '-' +d._index;
+									} else {
+										removeIdStr = d._index;
+									}
+								}}
+								<div class="portable_editor to_left">
+					     		<div class="editor_inner">
+					     		<div class="hd-title">
+						     		<span>{{d.name}}</span>
+						     		<a class="icons"><i class="fa fa-remove" onclick="removeWxMenu('{{removeIdStr}}')">&nbsp;删除菜单</i></a>
+					     		</div>
+					     		<form method="get" class="form-horizontal" id="wxMenuForm">
+			               		 	<input type="hidden" name="id" value="{{typeof d.id == 'undefined' ? '' : d.id}}">
+			               		 	<input type="hidden" name="pid" value="{{typeof d.pid == 'undefined' ? '' : d.pid}}">
+			               		 	<input type="hidden" name="pindex" value="{{typeof d.pindex == 'undefined' ? '' : d.pindex}}">
+			               		 	<input type="hidden" name="_index" value="{{typeof d._index == 'undefined' ? '' : d._index}}">
+			               		 	<input type="hidden" name="woaId" value="{{typeof d.woaId == 'undefined' ? '' : d.woaId}}">
+
+									{{# if(typeof d.subMenus != 'undefined' && d.subMenus.length > 0) { }}
+										<div class="alert alert-warning alert-dismissable">
+										<button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+										已添加子菜单，仅可设置菜单名称。
+										</div>
+									{{# } }}
+			                        <div class="form-group">
+			                            <label class="col-sm-2 control-label">菜单名称</label>
+			                            <div class="col-sm-10">
+											<input class="form-control" type="text" name="name" value="{{typeof d.name == 'undefined' ? '' : d.name}}" menu-index='{{removeIdStr}}'>
+										</div>
+			                        </div>
+									{{# if(typeof d.subMenus == 'undefined' || d.subMenus.length == 0) { }}
+			                        <div class="form-group">
+			                            <label class="col-sm-2 control-label">菜单内容</label>
+			                            <div class="col-sm-10">
+                                     	<label class="radio i-checks inline">
+                                         	<input type="radio" value="view" name="activetype" {{typeof d.activetype == 'undefined' || d.activetype == 'view' ? 'checked':''}}>一般链接&nbsp;&nbsp;
+                                     	</label>
+                                     	<label class="radio i-checks inline">
+                                         	<input type="radio" value="snsapi_base" name="activetype" {{d.activetype == 'snsapi_base' ? 'checked':''}}>授权链接&nbsp;&nbsp;
+                                     	</label>
+                                     	<label class="radio i-checks inline">
+                                         	<input type="radio" value="snsapi_userinfo" name="activetype" {{d.activetype == 'snsapi_userinfo' ? 'checked':''}}>用户信息链接&nbsp;&nbsp;
+                                     	</label>
+                                     	<label class="radio i-checks inline">
+                                         	<input type="radio" value="click" name="activetype" {{d.activetype == 'click' ? 'checked':''}}>普通按钮&nbsp;&nbsp;
+                                     	</label>
+			                            </div>
+			                        </div>
+			                        <div class="form-group">
+			                            <label class="col-sm-2 control-label"></label>
+			                            <div class="col-sm-10">
+											<input class="form-control" type="text" name="activekey" value="{{typeof d.activekey == 'undefined' ? '' : d.activekey}}">
+			                            	<span style="display:block; padding: 10px 12px; font-size: 12px; color: #817c7c">除"普通按钮"外，其它选项的菜单内容必须是合法的网址链接。</span>
+										</div>
+			                        </div>
+									{{# } }}
+			                    </form>
+					     		</div> 
+					     		<span class="editor_arrow_wrp">
+						     		<i class="editor_arrow editor_arrow_out"></i>
+						     		<i class="editor_arrow editor_arrow_in"></i>
+					     		</span> 
+								<button class="btn btn-primary" type="button" style="margin:20px 0" onclick="validSubmit()">保存并发布</button>
+								</div>
+								{{# } else { }}
+								<div id="wxMenuEditInit" class="menu_initial_tips tips_global">点击左侧菜单进行编辑操作</div>
+								{{# } }}
+						</script>
+					</div>
+				</div>
+		    </div>
+		</div>
+	</div>
+</div>
+<script src="${base}/js/modules/wxMenu/manage.js"></script>

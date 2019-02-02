@@ -1,0 +1,16 @@
+[{
+	"key": "save",
+	"value": "保存"	
+},{
+	"key": "delete",
+	"value": "删除"	
+},{
+	"key": "syn",
+	"value": "同步"	
+},{
+	"key": "disable",
+	"value": "禁用"	
+},{
+	"key": "enable",
+	"value": "启用"	
+}]

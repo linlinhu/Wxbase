@@ -1,0 +1,34 @@
+[{
+	"key": "distributor",
+	"value": "分销商"	
+},{
+	"key": "ecm",
+	"value": "主体"	
+},{
+	"key": "person",
+	"value": "用户"	
+},{
+	"key": "prdCategory",
+	"value": "产品分类"	
+},{
+	"key": "prdTag",
+	"value": "产品标签"	
+},{
+	"key": "product",
+	"value": "产品"	
+},{
+	"key": "region",
+	"value": "区域"	
+},{
+	"key": "award",
+	"value": "奖品"	
+},{
+	"key": "coupon",
+	"value": "优惠券"	
+},{
+	"key": "acyivityManagement",
+	"value": "活动管理"	
+},{
+	"key": "activityConf",
+	"value": "活动配置"	
+}]

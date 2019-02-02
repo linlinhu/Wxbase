@@ -1,0 +1,154 @@
+<div class="wrapper-content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>
+                    	图文-
+                    <#if wxresource??>
+                    	编辑
+                    <#else>
+                    	添加
+                    </#if>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="btn btn-white btn-bitbucket btn-xs" href="javascript: goPage('index?limit=8')">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+               		 <form method="get" class="form-horizontal" id="wxresourceForm">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">标题</label>
+                            <div class="col-sm-10">
+                            	<#if wxresource??>
+			                    	<input class="form-control" type="hidden" name="id" value="${wxresource.id}">
+			                    </#if>
+								<input class="form-control" type="text" name="title" value="${wxresource.title}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">描述</label>
+                            <div class="col-sm-10">
+								<input class="form-control" type="text" name="description" value="${wxresource.description}">
+                            </div> 
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">链接</label>
+                            <div class="col-sm-10">
+								<input class="form-control" type="text" name="url" value="${wxresource.url}">
+                            </div> 
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">图片类型</label>
+                            <div class="col-sm-10">
+								<#if wxresource??>
+                                     <label class="radio i-checks inline">
+                                         <input type="radio" checked="" value="1" name="size"
+                                         <#if wxresource.size=="1">
+                                          	checked=''
+                                          </#if>
+                                         > <i></i> 小图
+                                     </label>
+                                     <label class="radio i-checks inline">
+                                         <input type="radio"  value="2" name="size"
+                                          <#if wxresource.size=="2">
+                                          	checked=''
+                                          </#if>
+                                         > <i></i> 大图
+                                     </label>
+                                <#else>
+                                	<label class="radio i-checks inline">
+                                         <input type="radio" checked="" value="1" name="size" checked=''> <i></i> 小图
+                                     </label>
+                                     <label class="radio i-checks inline">
+                                         <input type="radio"  value="2" name="size"> <i></i> 小图
+                                     </label>
+                            	</#if>
+                            </div> 
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">图片路径</label>
+                            <div class="col-sm-10">
+								<input class="form-control" type="text" name="picUrl" value="${wxresource.picUrl}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" type="submit">保存内容</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+	var icon = "<i class='fa fa-times-circle'></i> ",
+		loading = null;
+	$('.i-checks').iCheck({
+	    checkboxClass: 'icheckbox_square-green',
+	    radioClass: 'iradio_square-green',
+	});
+	
+	$("#wxresourceForm").validate({
+        rules: {
+        	title: {
+                required: true,
+                rangelength: [1,20]
+            },
+            description: {
+            	required: true,
+                rangelength: [1,50]
+            },
+            url: {
+                required: true,
+                rangelength: [1,50]
+            },
+            size: {
+                required: true
+            },
+            picUrl: {
+                required: true
+            }
+        },
+        messages: {
+        	title: {
+                required: icon + "请输入标题",
+                rangelength: icon + "标题的输入长度必须介于1和20之间"
+            },
+            description: {
+            	required: icon + "请输入描述信息",
+                rangelength: icon + "描述信息的输入长度必须介于1和20之间"
+            },
+            url: {
+                required: icon + "请输入链接地址",
+                rangelength: icon + "链接地址输入长度必须介于1和50之间"
+            },
+            size: {
+                required: icon + "请选择图片类型"
+            },
+            picUrl: {
+                required: icon + "请选择图片路径"
+            }
+        },
+        submitHandler: function(){
+        	var submitObj = $('#wxresourceForm').serializeObject(),
+            	data={};
+	        submitObj.productionLine = {id:submitObj.productionLine};
+	       //console.log(submitObj);
+	        data = {
+	                jsonStr: JSON.stringify(submitObj)
+	        };
+        	save(data, 'wxresource')
+        }
+	});
+</script>

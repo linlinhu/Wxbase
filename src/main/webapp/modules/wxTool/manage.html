@@ -1,0 +1,77 @@
+<#setting datetime_format='yyyy-MM-dd HH:mm:ss'>
+<#setting date_format='yyyy-MM-dd'>
+<style>
+	#wxresourceContent{
+		
+	}
+	.table-hover tbody tr{
+	    height:100px;
+	}
+	.table-hover img{
+	    height: 60px;
+	    width: 100px;
+	}
+	.selectForm select{
+		margin:10px 0;
+	}
+</style>
+<div class="wrapper-content">
+	<div class="row">
+		<div class="col-sm-12">
+		    <div class="ibox float-e-margins">
+		        <div class="ibox-title">
+		            <h5>图文库管理</h5>
+		            <div class="ibox-tools hide" id="wxresourceAdd">
+		                <a class="btn btn-primary" href="javascript:goPage('form')" alt="添加图文库" title="添加图文库">
+		                    <i class="fa fa-plus"></i>
+		                </a>
+		            </div>
+		        </div>
+		        <div class="ibox-content col-sm-12" style="padding:0 15px;">
+		        	<form method="get" class="dr-search-form selectForm" id="wxresourceSelectForm">
+                        <select class="form-control" name="companyCode">
+                        	<option value=""></option>
+                        	<#list data.resultList as d>
+                        		<option value="${d.id}">${d.companyCode}</option>
+                        	</#list>
+                        </select>
+                	</form>
+		        	<div class="hide" id='wxresourceContent'>
+						
+						<table class="table table-hover">
+                          	<thead>
+                              	<tr>
+                                  <th>图片</th>
+                                  <th>标题</th>
+                                  <th>描述</th>
+								  <th>操作</th>
+                             	</tr>
+                           	</thead>	
+                          	 <script id="wxresourceDetailData" type="text/html">
+								{{#  layui.each(d.data, function(index, item){ }}
+  								<tr>
+                                    <td>
+										<img src="{{item.picUrl}}">
+                                    </td>
+                                    <td>{{item.title}}</td>
+									<td>{{item.description}}</td>
+                                    <td>
+										<a href="javascript: goPage('form?id={{item.id}}')" class="ipc-edit" alt="编辑" title="编辑"><i class="fa fa-pencil text-navy"></i>&nbsp;</a>
+			                        	<a href="javascript: remove('${item.id}', 'wxresource');" class="ipc-remove" alt="删除" title="删除"><i class="fa fa-trash text-navy" ></i></a>
+									</td>
+                                </tr>
+								{{#  }); }}
+								</script>
+                           	<tbody id="wxresourceDetail-view"></tbody>
+                       	</table>
+					</div>
+		        </div>
+		    </div>
+		</div>
+	</div>
+</div>
+<SCRIPT type="text/javascript">
+$('#wxresourceSelectForm select').on('change', function(){
+	selectcompanyCode('wxresource','ajaxTpl("url", "wxresource")')
+})		
+</SCRIPT>

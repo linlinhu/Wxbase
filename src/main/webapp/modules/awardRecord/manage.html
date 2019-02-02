@@ -1,0 +1,161 @@
+
+<#setting datetime_format='yyyy-MM-dd HH:mm:ss'>
+<#setting date_format='yyyy-MM-dd'>
+<style>
+	.searchDiv {
+		padding:5px 0!important;
+	}
+	.searchDiv input {
+		width:274px!important;
+	}
+</style>
+<div class="wrapper-content">
+	<div class="row">
+		<div class="col-sm-12">
+		    <div class="ibox float-e-margins">
+		        <div class="ibox-title">
+		            <h5>中奖及兑奖记录</h5>
+		        </div>
+		        <div class="ibox-content">
+		        	<div class="filter-line">
+	                	<form method="get" class="dr-search-form" id="awardRecordSearchForm">
+	                		<div class="col-sm-12 searchDiv">
+	                			<input type="hidden" name="page">
+                            	<#if hitTimeBegin?? && hitTimeBegin?length gt 0>
+                            	 <input placeholder="中奖日期" class="laydate-icon form-control layer-date" type="text" name="hitTime" id="hitDate" value="${hitTimeBegin?number_to_date} - ${hitTimeEnd?number_to_date}">
+                           		<#else>
+                           		 <input placeholder="中奖日期" class="laydate-icon form-control layer-date" type="text" name="hitTime" id="hitDate" value="">
+                            	</#if>
+                            	<#if consumeTimeBegin?? && consumeTimeBegin?length gt 0>
+                            	 <input placeholder="兑奖日期" class="laydate-icon form-control layer-date" type="text" name="consumeTime" id="consumeDate" value="${consumeTimeBegin?number_to_date} - ${consumeTimeEnd?number_to_date}">
+                           		<#else>
+                           		 <input placeholder="兑奖日期" class="laydate-icon form-control layer-date" type="text" name="consumeTime" id="consumeDate" value="">
+                            	</#if>
+	                		</div>
+	                		<div class="col-sm-12 searchDiv">
+	                			<input placeholder="微信昵称查询" class="form-control" type="text" name="nickName" value="${nickName!''}" role="user-params">
+                            	<input placeholder="兑奖点查询" class="form-control" type="text" name="consumeEcmName" value="${consumeEcmName!''}" role="user-params">
+                            	<button type="button" class="btn btn-primary submit" onclick="search()">搜索</button>
+                            	<button type="button" class="btn btn-default" role="reset"><i class="fa fa-refresh"></i></button>
+	                		</div>
+	                 	</form>
+	                </div>  
+		            <table class="footable table table-stripped toggle-arrow-tiny" id="awardRecordTable" data-page-size="${page.limit!10}" data-paging="false">
+		                <thead>
+							<tr>
+								<th data-toggle="true">序号</th>
+								<th>微信昵称</th>
+								<th>奖品</th>
+								<th>中奖时间</th>
+								<th>是否兑奖</th>
+								<th>兑奖时间</th>
+								<th>兑奖点</th>
+							</tr>
+						</thead>
+						<tbody>
+							<#if page?? && page.totalCount gt 0>
+	                    	<#list page.resultList as d>
+	                    		<tr>
+	                    			<td>${(page.currentPage -1) * page.pageSize + d_index + 1 }</td>
+	                    			<td>
+	                    				<#if d.fansInfo?? && d.fansInfo.nickname??>
+	                    					${d.fansInfo.nickname}
+	                    				<#else>
+	                    					-
+	                    				</#if>
+	                    			
+	                    			</td>
+	                    			<td>${d.awardInfo.name}</td>
+		                        	<td>
+		                        		${d.createTime?number_to_datetime}
+		                        	</td>
+		                        	<#if d.consumeRecord?? && d.consumeRecord.createTime?? >
+		                        	<td>
+		                        		是
+		                        	</td>
+		                        	<td>
+		                        		${d.consumeRecord.createTime?number_to_datetime}
+		                        	</td>
+		                        	<td>
+		                        		${d.consumeRecord.consumerInfo.ecm.name}
+		                        	</td>
+		                        	<#else>
+		                        	<td>
+		                        		否
+		                        	</td>
+		                        	<td>
+		                        		还未兑奖
+		                        	</td>
+		                        	<td>
+		                        		还未兑奖
+		                        	</td>
+		                        	</#if>
+	                        	</tr>
+							</#list>
+	                        <#else>
+	                        <tr>
+	                        	<td colspan="6">暂无数据</td>
+	                        </tr>
+	                        </#if>
+						</tbody>
+		            </table>
+		            <div class="text-right" id="awardRecordPage"></div>
+		        </div>
+		    </div>
+		</div>
+	</div>
+</div>
+<script>
+<#if page??>
+initTable({
+	modelName: 'awardRecord',
+	curr: '${page.currentPage!1}',
+	totalPage: '${page.totalPageNum!1}',
+	totalCount: '${page.totalCount!1}',
+	limit: '${page.limit!10}'
+});
+</#if>
+var hitDate = {
+		elem: '#hitDate', //指定元素
+		format: 'yyyy-MM-dd',
+		min: '2000-06-16', 
+        max: 0,
+		theme: '#5a98de',
+		range: true,
+		done: function (value, date) {
+			
+	    }
+	},
+	consumeDate = {
+			elem: '#consumeDate', //指定元素
+			format: 'yyyy-MM-dd',
+			min: '2000-06-16', 
+	        max: 0,
+			theme: '#5a98de',
+			range: true,
+			done: function (value, date) {
+				
+		    }
+		},
+	activityReceiveList = [];
+laydate.render(hitDate);
+laydate.render(consumeDate);
+
+function search(){
+	var searchParams = $('#awardRecordSearchForm').serializeObject(),
+		params = {},
+		hitTime = searchParams.hitTime?searchParams.hitTime.split(' - '):null;
+		consumeTime = searchParams.consumeTime?searchParams.consumeTime.split(' - '):null;
+	
+	params = {
+			nickName:searchParams.nickName,
+			consumeEcmName:searchParams.consumeEcmName,
+			hitTimeBegin: hitTime?(new Date((hitTime[0]+' 00:00:00'))).getTime():'',
+			hitTimeEnd: hitTime?(new Date((hitTime[1]+' 23:59:59'))).getTime():'',
+			consumeTimeBegin: consumeTime?(new Date((consumeTime[0]+' 00:00:00'))).getTime():'',
+			consumeTimeEnd: consumeTime?(new Date((consumeTime[1]+' 23:59:59'))).getTime():'',
+			limit:10
+	}
+	goPage('index', params);
+}
+</script>

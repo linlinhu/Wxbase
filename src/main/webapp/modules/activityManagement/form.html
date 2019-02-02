@@ -1,0 +1,306 @@
+<style>
+	#activityManagementForm > .content {
+		background: #fff;
+	}
+	#activityManagementForm > .steps > ul > li {
+	    width: 33%;
+	}
+	#activityManagementForm .content .body {
+		width: 100%;
+	}
+	
+	#activityManagementForm .content .body:last-child {
+		overflow: hidden;
+		overflow-y: scroll;
+	}
+	#ppForm-deviceChosen .iradio_square-green.disabled {
+		background-position: -216px 0;
+	}
+	.range li input {
+		display:inline-block!important;
+		height:34px;	
+	}
+	.range textarea {
+		padding-top:10px;
+		height:100px;
+	}
+	.range .step {
+		width:40% !important;
+		margin:10px 0;
+		padding-left:15px;
+		border-radius:3px;
+	}
+	.range .time {
+		width:20% !important;
+		margin:10px 0;
+		padding-left:15px;
+		border-radius:3px;
+	}
+	.readOnly{
+		background:#E8F2FE;
+		border-radius:3px;
+	}
+	.nopadding {
+		padding:0!important;
+	}
+	#awardEditForm {
+		border-left: 1px dotted #ccc;
+	}
+	.chosenMr{
+		position: absolute;
+    	top: 35px;
+    	left:73%;
+   	 	border-bottom: 1px solid;
+	}
+	.awardEditForm-title {
+		font-weight:600;
+		margin-bottom：10px;
+	}
+</style>
+<#setting date_format='yyyy-MM-dd'>
+<div class="wrapper-content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>添加活动</h5>
+                    <div class="ibox-tools">
+                       	<a class="btn btn-white btn-bitbucket btn-xs" href="javascript: goPage('index')">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form class="wizard-big form-horizontal" id="activityManagementForm">
+                    		<h1>活动基本信息</h1>
+                            <fieldset>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <ul class="text-center range basic">
+                                        	<li>活动名称</li>
+                                        	<li class="text-center">
+                                        		<input type="hidden" name="id" class="step">
+                                        		<input type="hidden" name="ecmId" class="step" value="${ecmId!''}">
+                                        		<input type="text" name="name" class="step">
+                                        	</li>
+                                        	<li>活动说明</li>
+                                        	<li class="text-center"><textarea class="step" name="description"></textarea></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                            </fieldset>
+                           <h1>活动范围</h1>
+                            <fieldset>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <ul class="text-center range">
+                                        	<li>参加活动的收货单</li>
+                                        	<li class="text-center">
+                                        		<input type="hidden" name="mrList">
+                                        		<input class="readOnly step" type=text" name="mrListName" readOnly placeholder="选择收货单" onclick="choseARec(this, 'choseARec', 'activityManagementForm')" onchange="chosenMrList()">
+                                        		<a class="btn btn-primary btn-xs chosenMr hide" href="javascript: chosenMrList()">
+								                    <i class="fa fa-search"></i>已选发货单
+								                </a>
+                                        	</li>
+                                        	<li>活动时间</li>
+                                        	<li class="text-center">
+                                        		<input placeholder="设置活动开始时间" class="laydate-icon layer-date time" type="text" name="setDateBegin" id="setDateBegin" value="">
+                                        		<input placeholder="设置活动结束时间" class="laydate-icon layer-date time" type="text" name="setDateEnd" id="setDateEnd" value="">
+                                        	</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <h1>选择奖品或优惠券</h1>
+                            <fieldset>
+                            	<div class="row">
+                                    <div class="col-sm-12">
+                                    	<div class="award-box col-sm-7 nopadding">
+                                    		<table class="footable table table-stripped awardList-table" data-page-size="3">
+												<thead>
+													<tr>
+													    <th>奖品类型</th>
+													    <th>名称</th>
+													    <th>奖品数量</th>
+													    <th>中奖率</th>
+													    <th>操作</th>
+													</tr>
+												</thead>
+												<script id="awardListDatas" type="text/html">
+												{{# if(d.length > 0) { }}
+												{{# layui.each(d, function(index, item){ }}
+												<tr>
+    											<td>
+													{{# if(item.awardType == 1) { }}
+														实物奖品 
+													{{# }else{ }}
+														优惠券
+													{{# } }}
+												</td>
+    											<td>{{item.awardInfo.name}}</td>
+    											<td>{{item.totalCount}}</td>
+												<td>{{item.probability}}%</td>
+												<td>
+													<a href="javascript:editAward('{{item.awardId}}',{{index}})" alt="编辑" title="编辑"><i class="fa fa-pencil text-navy">&nbsp;</i></a>&nbsp;
+                                    				<a href="javascript:removeAward('{{item.awardId}}')" alt="删除" title="删除"><i class="fa fa-trash text-navy">&nbsp;</i></a>&nbsp;
+												</td>
+												</tr>
+												{{# }); }}
+												{{# } }}
+												</script>
+												<tbody id="awardList-view"></tbody>
+												<tfoot>
+												    <tr>
+												        <td colspan="5">
+												            <ul class="pagination pull-right text-right" style="width:100%"></ul>
+												        </td>
+												    </tr>
+												</tfoot>
+											</table>
+                                    	</div>
+                                    	<div class="award-box col-sm-5">
+							                <span class='awardEditForm-title col-sm-12 text-right'>新增</span>
+	                                    	<div id="awardEditForm">
+	                                    		<div class="form-group">
+		                                    		<label class="col-sm-4 control-label">活动奖品</label>
+						                            <div class="col-sm-8">
+						                            	<input type='hidden' name="awardItem">
+														<input class="form-control readOnly" type="text" name="awardName" readyOnly onclick="choseAnAward(this, 'choseAnAward', 'activityManagementForm')" placeholder="选择奖品或者奖券">
+						                            </div>
+					                            </div>
+					                            <div class="form-group">
+		                                    		<label class="col-sm-4 control-label">填写奖品数</label>
+						                            <div class="col-sm-8">
+														<input class="form-control" type="number" name="totalCount" min="1" onkeydown="onlyNum()">
+						                            </div>
+					                            </div>
+					                            <div class="form-group">
+		                                    		<label class="col-sm-4 control-label">中奖率</label>
+						                            <div class="col-sm-8">
+														<input class="form-control" type="text" name="probability" readOnly>
+						                            </div>
+					                            </div>
+		                                    	<div class="form-group">
+						                            <div class="col-sm-10 col-sm-offset-2 text-right">
+						                                <a class="btn btn-primary saveAward" onclick="addAward()">保存奖品</a>
+						                                <a class="btn btn-default" onclick="showAddPanel()">清除</a>
+						                            </div>
+						                        </div>
+	                                    	</div>
+                                    	</div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="${base}js/modules/activityManagement/form.js"></script>
+<script src="${base}js/modules/activityManagement/pub.js"></script>
+<script>
+var awardList =[],
+	mrList = [];
+<#if activity??>
+	$('#activityManagementForm .basic input[name="name"]').val('${activity.name!""}');
+	$('#activityManagementForm .basic input[name="id"]').val('${activity.id!""}');
+	$('#activityManagementForm .basic textarea[name="description"]').html('${activity.description!""}');
+	$('#activityManagementForm .range input[name="setDateBegin"]').val('${activity.startTime?number_to_date}');
+	$('#activityManagementForm .range input[name="setDateEnd"]').val('${activity.endTime?number_to_date}');
+	
+	<#if  activity.awardList?size gt 0>
+	<#list activity.awardList as award>
+		var temp = {};
+		temp = {
+        	awardInfo:{
+        		name:'${award.awardInfo.name!""}',
+        		awardId:'${award.awardInfo.awardId!""}',
+        		awardType: '${award.awardInfo.awardType!""}',
+        		picUrls:{
+            		originalName:'${award.awardInfo.picUrls.originalName}',
+    				originalMimeType:'${award.awardInfo.picUrls.originalMimeType}',
+    				originalSize:'${award.awardInfo.picUrls.originalName}',
+    				originalContentType:'${award.awardInfo.picUrls.originalContentType}',
+    				storage:[]
+            	}
+        	},
+        	awardType: '${award.awardType!""}',
+        	awardId: '${award.awardId!""}',
+        	totalCount: '${award.totalCount!""}',
+        	probability: '${award.probability!""}',
+        	wxActivityId: '${award.wxActivityId!""}'
+        	
+		};
+		<#list award.awardInfo.picUrls.storage as d>
+		temp.awardInfo.picUrls.storage.push({
+			imgQualityType:'${d.imgQualityType}',
+			fileStorageUrl:'${d.fileStorageUrl}',
+			available:'${d.available}',
+			destinationStorageHost:'${d.destinationStorageHost}',
+			fileId:'${d.fileId}'
+		})
+		</#list>
+		awardList.push(temp);
+		
+	</#list>
+	</#if>
+	<#if  activity.mrList?size gt 0>
+		var temp = '';
+	<#list activity.mrList as mr>
+		mrList.push({
+			receiveSN:'${mr.receiveSN}',
+			productCount:'${mr.productCount}',
+			receiver:{
+				receiverPersonName:'${mr.receiver.receiverPersonName}',
+				receiverPersonPhone:'${mr.receiver.receiverPersonPhone}'
+			},
+			receiverECM:{
+				ecmId:'${mr.receiverECM.ecmId}',
+				name:'${mr.receiverECM.name}'
+			}
+		});
+		temp += ('${mr.receiveSN}'+'  ');
+	</#list>
+	$('#activityManagementForm input[name="mrList"]').val(JSON.stringify(mrList));
+	$('#activityManagementForm input[name="mrListName"]').val(temp);
+	$('#activityManagementForm .chosenMr').removeClass('hide');
+	</#if>
+</#if>
+var setDateBegin = {
+		elem: '#setDateBegin', //指定元素
+		format: 'yyyy-MM-dd',
+		min: 1, 
+        max: '2099-06-16',
+		theme: '#5a98de',
+		range: false,
+		istime: true,
+		istoday: false,
+		btns: ['clear', 'confirm'],
+		choose: function(datas){
+			setDateEnd.min = datas; 
+		}
+	},
+	setDateEnd = {
+			elem: '#setDateEnd', //指定元素
+			format: 'yyyy-MM-dd',
+			min: 1, 
+	        max: '2099-06-16',
+			theme: '#5a98de',
+			range: false,
+			istime: true,
+			istoday: false,
+			btns: ['clear', 'confirm'],
+			choose: function(datas){
+				setDateBegin.max = datas; 
+				setDateBegin.start = datas;
+			}
+		};
+	
+laydate.render(setDateBegin); 
+laydate.render(setDateEnd); 
+
+renderAwardList(awardList);
+</script>

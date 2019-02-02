@@ -1,0 +1,252 @@
+<div class="wrapper-content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>
+                    	事件回复-
+                    <#if eventReply??>
+                    	编辑
+                    <#else>
+                    	添加
+                    </#if>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="btn btn-white btn-bitbucket btn-xs" href="javascript: goPage('index?limit=8')">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+               		 <form method="get" class="form-horizontal" id="eventReplyForm">
+               		 	<input type="hidden" name="id">
+               		 	<input type="hidden" name="woaId" value="${woaId}">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">公众号菜单/事件代码</label>
+                            <div class="col-sm-10">
+                            	<input class="form-control" name="eventKey" style="width: 282px; position: absolute">
+								<select class="form-control" id="wxMenuActivekeys" style="width: 300px;">
+									<option>--请选择公众号菜单--</option>
+									<#list eventMenus as em>
+									<option value="${em.activekey}" data-name="${em.name}" onclick="inputSelectedEventKey(this)">${em.name}-${em.activekey}</option>
+									</#list>
+								</select>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">回复类型</label>
+                            <div class="col-sm-10">
+                            	<label class="radio i-checks inline">
+                            		<input type="radio" checked value="news" name="replyType">图文
+                           		</label>
+								<label class="radio i-checks inline">
+									<input type="radio"  value="text" name="replyType"> 文本
+                                </label>
+                            </div> 
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group newsContainer">
+                        	<label class="col-sm-2 control-label"></label>
+                            <div class="col-sm-10">
+                            	<input type="hidden" name="articleIds">
+                            	<div id="er-articles-opers">
+	                            	<a href="javascript:openERAConfig()"><i class="fa fa-plus">&nbsp;添加</i></a>&nbsp;
+                            	</div>
+                            	<div class="hide articles-show" id="er-articles-view"></div>
+                            	<script id="erArticlesTPL" type="text/html">
+									{{# if(d && (d.first || d.subs.length > 0)) { }}
+									<ul class="walist reply-view">
+									{{# if(d.first) { }}
+									<li class="type_{{d.first.size}}">
+										<div class="wa-title">{{d.first.title}}</div>
+										<img class="wa-img" src="{{d.first.picUrl}}"/>
+									</li>
+									{{# } }}
+									{{# if(d.subs && d.subs.length > 0) { }}
+									{{# layui.each(d.subs, function(index, item){ }}
+									<li class="type_{{item.size}}">
+										<div class="wa-title">{{item.title}}</div>
+										<img class="wa-img" src="{{item.picUrl}}"/>
+									</li>
+									{{# });}}
+									{{# } }}
+									</ul>
+									<div class="text-center" style="margin-top: 15px">
+									<button class="btn btn-defult btn-circle btn-lg" type="button" title="重置" alt="重置" onclick="erArticlesOpersShow()"><i class="fa fa-refresh"></i></button>
+									</div>
+									{{# } }}
+								</script>
+                            </div> 
+                        </div>
+                        <div class="form-group textContainer hide">
+	                            <label class="col-sm-2 control-label">文本内容</label>
+	                            <div class="col-sm-10">
+									<textarea class="form-control" name="content">${eventReply.content}</textarea>
+	                            </div>                        	
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" type="submit">保存内容</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+var woaId = '${woaId}';
+<#if eventReply??>
+	$('#eventReplyForm input[name="id"]').val('${eventReply.id!""}');
+	$('#eventReplyForm input[name="eventKey"]').val('${eventReply.eventKey!""}');
+	$('#wxMenuActivekeys').val('${eventReply.eventKey!""}');
+	if ('${eventReply.replyType}' == 'news') {
+		$($('#eventReplyForm input[name="replyType"]')[0]).attr('checked', true);
+		<#if eventReply.articles??>
+			var articles = {
+					first: null,
+					subs: []
+				};
+			<#list eventReply.articles as a>
+				var cur = {
+						id: '${a.id}',
+						title: '${a.title}',
+						size: '${a.size}',
+						picUrl: '${a.picUrl}'
+					};
+				if ('${a.size}' == '1') {
+					articles.first = cur;
+				} else {
+					articles.subs.push(cur);
+				}
+			</#list>
+			erArticlesDatasShow(articles);
+		</#if>
+	} else {
+		$($('#eventReplyForm input[name="replyType"]')[1]).attr('checked', true);
+	}
+	
+	showERTContainer('${eventReply.replyType}');
+	
+	<#if eventReply.preferences >
+		$($('#eventReplyForm input[name="preferences"]')[0]).attr('checked', true);
+	<#else>
+		$($('#eventReplyForm input[name="preferences"]')[1]).attr('checked', true);
+	</#if>
+</#if>
+$('.i-checks').iCheck({
+    checkboxClass: 'icheckbox_square-green',
+    radioClass: 'iradio_square-green',
+});
+$('input[name="replyType"]').on('ifChecked', function(event){
+	var replyType = event.currentTarget.value;
+	
+	showERTContainer(replyType);
+})
+
+function showERTContainer(rt) {
+	var newsContent = $('#eventReplyForm  .newsContainer'),
+		textContent = $('#eventReplyForm  .textContainer');
+	
+	rt = rt ? rt : 'news';
+	
+	if (rt == 'news') {
+		newsContent.removeClass('hide');
+		if (!textContent.hasClass('hide')) {
+			textContent.addClass('hide');
+		}
+	} else {
+		if (!newsContent.hasClass('hide')) {
+			newsContent.addClass('hide');
+		}
+		textContent.removeClass('hide');
+	}
+}
+
+$("#eventReplyForm").validate({
+	rules: {
+		eventKey: {
+	        required: true
+	    }
+	},
+	messages: {
+		eventKey: {
+	        required: icon + "请选择公众号菜单"
+	    }
+	},
+	submitHandler: function(){
+		var submitObj = $('#eventReplyForm').serializeObject(),
+	    	articleIds = submitObj.articleIds;
+	
+	    delete submitObj.articleIds;
+	    if (submitObj.replyType == 'news') {
+	    	if (articleIds == '') {
+		    	layer.msg('请配置图文回复内容', {icon: 5});
+		    	return false;
+	    	}
+	    	
+	    	submitObj.content = '';
+	    }
+	    
+	    if (submitObj.replyType == 'text'){
+	    	if(submitObj.content == '') {
+	    		layer.msg('请输入文本回复内容', {icon: 5});
+		    	return false;
+	    	}
+	    	articleIds = '';
+	    } 
+		save({
+			jsonStr: JSON.stringify(submitObj),
+			articleIds: articleIds,
+   			history: true
+		}, 'eventReply')
+	}
+});
+function erArticlesOpersShow() {
+	$('#er-articles-opers').removeClass('hide');
+	$('#er-articles-view').html('').addClass('hide');
+}
+
+function erArticlesDatasShow(datas) {
+	var tpl = erArticlesTPL.innerHTML,
+		view = $('#er-articles-view'),
+		ids = '';
+	
+	ids = datas.first.id;
+	for (i = 0; i < datas.subs.length; i++) {
+		ids += ',' + datas.subs[i].id;
+	}
+	$('#eventReplyForm input[name="articleIds"]').val(ids);
+	$('#er-articles-opers').addClass('hide');
+	laytpl(tpl).render(datas, function(html){
+		view.html(html).removeClass('hide');
+	});
+}
+
+function openERAConfig() {
+	openArticlesReplyConfigPanel({
+		woaId: woaId
+	}, function(flag, datas) {
+		var tpl = erArticlesTPL.innerHTML,
+			view = $('#er-articles-view');
+		
+		if (flag == 'reset') {
+			erArticlesOpersShow();
+		}
+		
+		if (flag == 'configed') {
+			erArticlesDatasShow(datas);
+		}
+	})
+}
+
+function inputSelectedEventKey(self) {
+	var val = $(self).val();
+	$('#eventReplyForm input[name="eventKey"]').val(val);
+}
+
+
+</script>

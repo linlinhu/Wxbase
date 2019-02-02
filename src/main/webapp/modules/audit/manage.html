@@ -1,0 +1,144 @@
+
+<#setting datetime_format='yyyy-MM-dd HH:mm:ss'>
+<#setting date_format='yyyy-MM-dd'>
+<div class="wrapper-content">
+	<div class="row">
+		<div class="col-sm-12">
+		    <div class="ibox float-e-margins">
+		        <div class="ibox-title">
+		            <h5>活动审核</h5>
+		        </div>
+		        <div class="ibox-content">
+		        	<div class="filter-line">
+	                	<form method="get" class="dr-search-form" id="auditSearchForm">
+							<input type="hidden" name="page">
+                            <input placeholder="活动名称查询" class="form-control" type="text" name="keyword" value="${keyword!''}" role="user-params">
+                            <#if startTimeBegin?? && startTimeBegin?length gt 0>
+                            	 <input placeholder="活动开始日期" class="laydate-icon form-control layer-date" type="text" name="begintime" id="auditDate" value="${startTimeBegin?number_to_date} - ${startTimeEnd?number_to_date}">
+                           	<#else>
+                           		 <input placeholder="活动开始日期" class="laydate-icon form-control layer-date" type="text" name="begintime" id="auditDate" value="">
+                            </#if>
+                           
+                            <button type="button" class="btn btn-primary submit" onclick="search()">搜索</button>
+                            <button type="button" class="btn btn-default" role="reset"><i class="fa fa-refresh"></i></button>
+	                 	</form>
+	                </div>  
+		            <table class="footable table table-stripped toggle-arrow-tiny" id="auditTable" data-page-size="${page.limit!10}" data-paging="false">
+		                <thead>
+							<tr>
+								<th data-toggle="true">序号</th>
+								<th>活动名称</th>
+								<th>活动分销商</th>
+								<th>活动时间段</th>
+								<th>审核状态</th>
+								<th>更新时间</th>
+								<th data-hide="all">活动奖品</th>
+								<th data-hide="all">参与活动产品单号</th>
+								<th data-hide="all">活动描述</th>
+								<th data-sort-ignore="true">操作</th>
+							</tr>
+						</thead>
+						<tbody>
+							<#if page?? && page.totalCount gt 0>
+	                    	<#list page.resultList as d>
+	                    		<tr>
+	                    			<td>${(page.currentPage -1) * page.pageSize + d_index + 1 }</td>
+	                    			<td>${d.name}</td>
+	                    			<td>${d.creator.ecm.name!""}</td>
+		                        	<td>
+		                        		${d.startTime?number_to_date} - ${d.endTime?number_to_date}
+		                        	</td>
+		                        	<td>
+		                        		<#if d.activityStatus == 1>
+		                        			待审核
+		                        		<#elseif d.activityStatus == 2>
+		                        			通过
+		                        		<#elseif d.activityStatus == -1>
+		                        			驳回
+		                        		</#if>
+		                        	</td>
+		                        	<td>
+		                        		${d.createTime?number_to_date}
+		                        	</td>
+		                        	<td>
+		                        		<#list d.awardList as award>
+		                        			<p>
+		                        				${award.awardInfo.name!""}&nbsp;&nbsp;&nbsp;奖品数量：${award.totalCount}&nbsp;&nbsp;&nbsp;中奖率：${award.probability}%
+		                        			</p>
+		                        		 </#list>
+		                        	</td>
+		                        	<td>
+		                        		<#list d.mrList as mr>
+		                        			<p>
+		                        				${mr.receiveSN}
+		                        			</p>
+		                        		 </#list>
+		                        	</td>
+		                        	<td>
+		                        		${d.description}
+		                        	</td>
+		                        	<td>
+		                        	<#if d.activityStatus == 1>
+		                        		<a href="javascript: goPage('form', {id:${d.id}})" alt="审核" title="审核"><i class="fa fa-user-secret text-navy">&nbsp;</i></a>&nbsp;
+		                        	<#else>
+		                        		<a href="javascript: goPage('form', {id:${d.id}})" alt="详情" title="详情"><i class="fa fa-info-circle text-navy">&nbsp;</i></a>&nbsp;
+		                        	</#if>
+                                    <a href="javascript: getLogs(${d.id});" alt="追踪" title="追踪"><i class="fa fa-crosshairs text-navy">&nbsp;</i></a>&nbsp;
+		                        	</td>
+	                        	</tr>
+							</#list>
+	                        <#else>
+	                        <tr>
+	                        	<td colspan="6">暂无数据</td>
+	                        </tr>
+	                        </#if>
+						</tbody>
+		            </table>
+		            <div class="text-right" id="auditPage"></div>
+		        </div>
+		    </div>
+		</div>
+	</div>
+</div>
+<script src="${base}js/modules/audit/pub.js"></script>
+<script>
+<#if page??>
+initTable({
+	modelName: 'audit',
+	curr: '${page.currentPage!1}',
+	totalPage: '${page.totalPageNum!1}',
+	totalCount: '${page.totalCount!1}',
+	limit: '${page.limit!10}'
+});
+</#if>
+var activityDate = {
+		elem: '#auditDate', //指定元素
+		format: 'yyyy-MM-dd',
+		min: '1900-06-16', 
+        max: '2099-06-16',
+		theme: '#5a98de',
+		range: true,
+		done: function (value, date) {
+			
+	    }
+	},
+	activityReceiveList = [];
+laydate.render(activityDate);
+
+var activityStatus = 0;//活动状态
+
+
+function search(){
+	var searchParams = $('#auditSearchForm').serializeObject(),
+		params = {},
+		time = searchParams.begintime.split(' - ');
+	
+	params = {
+			keyword:searchParams.keyword,
+			startTimeBegin: (new Date((time[0]+' 00:00:00'))).getTime()?(new Date((time[0]+' 00:00:00'))).getTime():'',
+			startTimeEnd: (new Date((time[1]+' 23:59:59'))).getTime()?(new Date((time[1]+' 23:59:59'))).getTime():'',
+			limit:10
+	}
+	goPage('index', params);
+}
+</script>

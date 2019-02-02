@@ -1,0 +1,145 @@
+ <div class="wrapper-content">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5 class="form-title">活动配置</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <form method="get" class="form-horizontal" id="activityConfForm">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">允许发起活动的分销商</label>
+                                <div class="col-sm-10">
+                                   <select class="form-control dis-select" name="allowCreateActivityEcmIds" multiple='multiple'>
+                                   		<#list dis as disItem>
+                                   			<option value="${disItem.ecmId}"
+                                   				<#list activityConf.allowCreateActivityEcmIds?split(",") as ecmId>
+	                                   				<#if ecmId?? && disItem.ecmId?number == ecmId?number>
+	                                   					selected
+	                                   				</#if>
+                                   				</#list>
+                                   			 >${disItem.name}</option>
+                                   		</#list>
+                                   </select>
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">活动公众号</label>
+                                <div class="col-sm-10">
+                                  	<select class="form-control" name="woaItem">
+                                  		<#if activityConf?? && activityConf.entryWoaId??>
+                                  			<#list woaList as woaItem>
+	                                   			<option value='{"id":"${woaItem.id}","name":"${woaItem.companyName}"}'
+	                                   				<#if activityConf.entryWoaId==woaItem.id>
+	                                   					selected				
+	                                   				</#if>
+	                                   			 >${woaItem.companyName}</option>
+	                                   		</#list>
+                                  		<#else>
+                                  			<#list woaList as woaItem>
+	                                   			<option value='{"id":"${woaItem.id}","name":"${woaItem.companyName}"}'
+	                                   				<#if woaItem_index==0>
+	                                   					selected				
+	                                   				</#if>
+	                                   			 >${woaItem.companyName}</option>
+	                                   		</#list>
+                                  		</#if>
+                                   </select>
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <div class="col-sm-4 col-sm-offset-2">
+                                	<button class="btn btn-primary" type="submit">保存内容</button>
+                                    <button class="btn btn-white" type="button" onclick="configReset()">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    <#if woaList?? && woaList?size gt 0>
+    <#else>
+    	layer.confirm('请添加微信公众号', {
+    		btn: ['现在去添加','取消']
+    	}, function(){
+    		layer.closeAll('dialog');
+    		goModule({
+    			moduleName:'wxoa',
+    			directive:'form'
+    		});
+    	});
+    </#if>
+    	
+   		//初始化chosen插件
+   		$('.dis-select').chosen({
+   			allow_single_deselect: true, //删除选项
+   			max_selected_options: 999, //多选上限
+   			disable_search:true, //禁用搜索框
+   			placeholder_text_multiple:'请选择分销商' //提示值
+   		}); 
+    	
+    	$('.dis-select').on('chosen:ready', function(e, params) {
+ 			$(".dis-select").val(whiteList)//设置值  
+ 			$('.dis-select').trigger('chosen:updated');//更新选项  
+ 			console.log('准备就绪')
+ 		});
+    	
+    	//获取select的内容
+    	$('.dis-select').on('change', function(e, params) {
+		 console.log($(this).val())
+		});
+    	
+    	$("#activityConfForm").validate({
+    		rules: {
+    			/* allowCreateActivityEcmIds: {
+    		        required: true
+    		    }, */
+    		    woaItem: {
+    		    	required: true
+    		    }
+    		},
+    		messages: {
+    			/* allowCreateActivityEcmIds: {
+    		        required: icon + "请选择分销商"
+    		    }, */
+    		    woaItem: {
+    		    	 required: icon + "请选择微信公众号"
+    		   	}
+    		},
+    		submitHandler: function(){
+    			var submitObj = $('#activityConfForm').serializeObject(),
+    				params = {},
+    				ecmIds = '';
+    			
+    				submitObj.woaItem = JSON.parse(submitObj.woaItem);
+    				if(typeof submitObj.allowCreateActivityEcmIds != 'string' && submitObj.allowCreateActivityEcmIds=='') {
+    					submitObj.allowCreateActivityEcmIds = submitObj.allowCreateActivityEcmIds.join(',');
+    				}
+    				if(typeof submitObj.allowCreateActivityEcmIds == 'undefined' || submitObj.allowCreateActivityEcmIds == '') {
+    					ecmIds = ''
+    				} else {
+    					ecmIds = ',' + submitObj.allowCreateActivityEcmIds + ','
+    				}
+    				params = {
+   						allowCreateActivityEcmIds:ecmIds,
+   	   					entryWoaId: submitObj.woaItem.id,
+   	   					entryWoaName: submitObj.woaItem.name
+   	   				}
+        			save({
+        				jsonStr: JSON.stringify(params)
+        			}, 'activityConf')
+    			
+    		}
+    	});
+    	//重置
+    	function configReset(){
+    		goPage("index")
+    	}
+    </script>
+    
+    

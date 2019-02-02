@@ -1,0 +1,346 @@
+<style>
+.mySelect {
+	position: relative;
+	border:1px solid #ccc;
+}
+.myInput {
+	/* position:absolute!important;
+	top:0;
+	left:0; */
+}
+.myInput input {
+	margin-top:-6px!important;
+	height:32px;
+	width:98%;
+	border:0;
+	border-right: 1px solid #ccc;	
+}
+.myInput .iconSpan{
+	position:absolute!important;
+	display:inline-block;
+	
+	width:2%;
+	top:4px!important;
+	right:4px!important;
+	line-height:20px;
+	text-align:center;
+	cursor: pointer;
+}
+.myOption {
+	position: absolute;
+	
+	margin-left: -13px;
+	width: 100%;
+    border: 1px solid #ccc;
+   	z-index: 9;
+    background: #fff;
+}
+.myOption li {
+	height:20px;
+	padding:2px 10px 2px 16px;
+}
+.myOption li:hover{
+	background:#E8F2FE
+}
+.left {
+	float:left;
+	width:95%;
+}
+.right {
+	float:right;
+}
+.myOption li i {
+	display:none;
+	cursor: pointer;
+}
+.myOption li:hover i{
+	display:inline-block;
+}
+#unit-error {
+	margin-left:-12px;
+}
+
+</style>
+<div class="wrapper-content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>
+                    	奖品-
+                    <#if award??>
+                    	编辑
+                    <#else>
+                    	添加
+                    </#if>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="btn btn-white btn-bitbucket btn-xs" href="javascript: goPage('index?limit=8')">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+               		 <form method="get" class="form-horizontal" id="awardForm">
+               		 	<input type="hidden" name="id">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">奖品名称</label>
+                            <div class="col-sm-10">
+								<input class="form-control" type="text" name="name">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">奖品图片</label>
+                            <div class="col-sm-10">
+                            	<div class="upload-input">
+                            		<input class="form-control" type="hidden" name="picUrls">
+                            		<i class="fa fa-plus text-navy" onclick="uploadAwardImgResources()"></i>
+                            		<p class="upload-tips">建议上传长宽比例为1:1的图片</p>
+                            	</div>
+								<div class="upload-img hide">
+									<img class="pro-img"/>
+									<span class="removeImg"><i class="fa fa-times"></i></span>
+								</div>
+                            </div> 
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">奖品单位</label>
+                            <div class="col-sm-10 unitContainer">
+	                            <div class="mySelect form-control">
+						        	<div class="myInput">
+						        		<input type="text" name="unit">
+						        		<span class="iconSpan" onclick="switchOption()"><i class="fa fa-sort-desc"></i></span>
+						        	</div>
+						        	<ul class="myOption hide" id="awardUnit-view"></ul>
+						        </div>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+	                            <label class="col-sm-2 control-label">奖品描述</label>
+	                            <div class="col-sm-10">
+									<textarea class="form-control" name="description">${award.description!""}</textarea>
+	                            </div>                        	
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" type="submit">保存内容</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script id="awardUnitDatas" type="text/html">
+	{{# if(d.length > 0) { }}
+		
+	{{# layui.each(d, function(index, item){ }}
+		<li>
+		<span class="left" value="{{item.name}}" onclick="chooseOption('{{item.name}}')">{{item.name}}</span>
+		<i class="right fa fa-times" onclick="deleteOption('{{item.id}}')"></i>
+		</li>		
+	{{# }); }}
+	{{# } }}
+</script>
+<script>
+<#if award??>
+	$('#awardForm input[name="id"]').val('${award.id!""}');
+	$('#awardForm input[name="name"]').val('${award.name!""}');
+	$('#awardForm input[name="unit"]').val('${award.unit!""}');
+	<#if award.picUrls?? && award.picUrls.storage?? && award.picUrls.storage?size gt 0>
+		var  temp = {
+			originalName:'${award.picUrls.originalName}',
+			originalMimeType:'${award.picUrls.originalMimeType}',
+			originalSize:'${award.picUrls.originalName}',
+			originalContentType:'${award.picUrls.originalContentType}',
+			storage:[]
+		}
+		<#list award.picUrls.storage as d>
+		temp.storage.push({
+			imgQualityType:'${d.imgQualityType}',
+			fileStorageUrl:'${d.fileStorageUrl}',
+			available:'${d.available}',
+			destinationStorageHost:'${d.destinationStorageHost}',
+			fileId:'${d.fileId}'
+		})
+		</#list>
+		
+		showUploadImg(temp,'#awardForm')
+	</#if>
+</#if>
+getAwardUnitList();//获取奖品单位
+var unitList = [];
+$("#awardForm").validate({
+	rules: {
+		name: {
+	        required: true,
+	        rangelength: [2,30],
+	        isName:true
+	    },
+	    picUrls: {
+	    	required: true
+	    },
+	    unit: {
+	    	required: true,
+	    	isChinese: true,
+	    	rangelength: [1,4]
+	    	
+	    },
+	    description:{
+	    	rangelength: [0,100]
+	    }
+	},
+	messages: {
+		name: {
+	        required: icon + "请输入奖品名称",
+	        rangelength: icon + "奖品名称的长度介于2-30之间",
+	        isName: icon + "不能以空格开始或结尾"
+	    },
+	    picUrls: {
+	    	 required: icon + "请上传图片",
+	    },
+	    unit: {
+	        required: icon + "请输入/填写奖品单位",
+	        isChinese: icon + "奖品单位只能是中文字符",
+	        rangelength: icon + "奖品单位的长度不能超过4" 
+	    },
+	    description:{
+	    	rangelength: icon + "奖品描述的长度不能超过100"
+	    }
+	},
+	submitHandler: function(){
+		var submitObj = $('#awardForm').serializeObject();
+		submitObj.picUrls = JSON.parse(submitObj.picUrls);
+		submitObj.unit = submitObj.unit.trim();
+		save({
+			jsonStr: JSON.stringify(submitObj)
+		}, 'award')
+	}
+});
+
+
+$('.removeImg').on('click',function(){
+	removeUploadImg('#awardForm');
+})
+
+function uploadAwardImgResources() {
+	var html =  '<div id="uploadInterface" style="z-index:999;">'+
+					'<div class="webuploader" id="awardImgResourcesUploader">'+
+						$('#webuploaderTPL').html() +
+				    '</div>'+
+				'</div>',
+		uploadPics = [];	
+				
+	layer.open({
+		type : 1,
+		title : '上传图片资源',
+		skin : 'layui-layer-rim', //加上边框
+		area : [ '60%', '450px' ], //宽高
+		content : '<div class="wrapper-content">' + html + '</div>',
+		btn : [ '确定'],
+		yes : function(lindex, layero) {
+			if (uploadPics.length == 0) {
+				layer.msg('请上传张图片后再点击此按钮', {icon: 5});
+				return false;
+			} else {
+				showUploadImg(uploadPics[0],'#awardForm')
+				
+				$('#awardForm input[name="picUrls"]').parent().parent().parent().removeClass('has-error');
+				$('#awardForm input[name="picUrls"]').parent().parent().parent().addClass('has-success');
+				layer.closeAll();
+			}
+			
+		}
+	});
+	
+	CUploadFiles({
+		uploaderId: 'awardImgResourcesUploader',
+		filesType: ['img'],
+		uploadUrl: '/file/upload.do',
+		fileNumLimit: 1
+	}, function(file, response){
+		if(response.success){
+			uploadPics.push(response.result);
+		} else {
+			layer.msg(response.message?response.message:'上传失败', {icon: 5});
+		}
+	})
+}
+
+function getAwardUnitList(){
+	var option = {
+			url: '${base}award/awardUnitList',
+			type:'GET'
+	};
+	ajaxRequest(option, function(result){
+		if(result.success){
+			unitList = result.result;
+			render(result.result)
+		} else {
+			layer.msg('获取奖品单位失败', {icon: 5});
+		}
+		
+	})
+}
+
+function render(list) {  
+	var awardUnitListTpl = awardUnitDatas.innerHTML,//数据模板
+	 awardUnitListView = $('#awardUnit-view');
+	if(list.length > 0) {
+		laytpl( awardUnitListTpl).render(list, function(html){
+			 awardUnitListView.html(html);
+		});
+	} else {
+		awardUnitListView.html('<li>暂无单位</li>')
+	}
+}
+
+function chooseOption(name){
+	console.log(name);
+	$('.myInput input').val(name);
+	$('#awardForm input[name="unit"]').parent().parent().parent().parent().removeClass('has-error');
+	$('#awardForm input[name="unit"]').parent().parent().parent().parent().addClass('has-success');
+	$('#awardForm #unit-error').html('');
+	switchOption();
+};
+function deleteOption(id){
+	var option = {
+			url: '${base}award/awardUnitDelete',
+			type:'POST',
+			data:{id:id}
+	};
+	ajaxRequest(option, function(result){
+		if(result.success) {
+			for(var i = 0; i < unitList.length; i++) {
+				if(id == unitList[i].id) {
+					 unitList.splice(i,1);
+					 render(unitList);
+				}
+			}
+		} else {
+			layer.msg('删除失败', {icon: 5});
+		}
+	})
+};
+function switchOption(){
+	if($('.myOption').hasClass('hide')) {
+		$('.myOption').removeClass('hide');
+		var w= $('.myOption')[0].offsetParent.offsetWidth - 2;
+		$('.myOption').width(w)
+	} else {
+		$('.myOption').addClass('hide');
+	}
+}
+$('input[name="unit"]').on('focus',function(){
+	$('.myOption').addClass('hide');
+})
+
+jQuery.validator.addMethod("isName", function(value, element) {       
+    return this.optional(element) || /^\S.*\S$/.test(value);       
+}, "不能以空格开始或结尾");
+</script>

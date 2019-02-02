@@ -1,0 +1,210 @@
+<style>
+	div[name="awardList"],
+	div[name="mrList"],
+	textarea[name="description"] {
+		height:55px;
+		overflow:auto;
+	}
+	.getLogs {
+		cursor:pointer;
+		font-weight:600;
+	}
+</style>
+<#setting date_format='yyyy-MM-dd'>
+<div class="wrapper-content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>
+                    	活动 -
+                    <#if activity?? && activity.activityStatus == 1>
+                    	审核
+                    <#else>
+                    	详情
+                    </#if>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="btn btn-white btn-bitbucket btn-xs" href="javascript: goPage('index?limit=8')">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+               		 <form method="get" class="form-horizontal" id="auditForm">
+               		 	<input type="hidden" name="wxActivityId">
+               		 	<input type="hidden" name="ecmId">
+               		 	<input type="hidden" name="auditorEcmId">
+               		 	<div class="form-group">
+                            <label class="col-sm-2 control-label">活动分销商</label>
+                            <div class="col-sm-10">
+								<p class="form-control" type="text" name="creatorUsername"></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">活动名称</label>
+                            <div class="col-sm-10">
+								<p class="form-control" type="text" name="name"></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">活动时段</label>
+                            <div class="col-sm-10">
+								<p class="form-control" type="text" name="setDate"></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">活动奖品</label>
+                            <div class="col-sm-10">
+								<div class="form-control" name="awardList"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">参与活动产品单号</label>
+                            <div class="col-sm-10">
+								<div class="form-control" name="mrList" onclick="getMrList(${activity.id},${activity.creatorEcmId})" title="点击查看详情"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">活动描述</label>
+                            <div class="col-sm-10">
+								<p class="form-control" name="description"></p>
+                            </div>
+                        </div>
+                        
+                        <#if activity.activityStatus == 1>
+                    	<div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">审核建议</label>
+                            <div class="col-sm-10">
+								<textarea class="form-control" type="text" name="remark"></textarea>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" data-type="1" type="submit">通过</button>
+                                <button class="btn btn-danger" data-type="-1" type="submit">驳回</button>
+                            </div>
+                            <p class="col-sm-4 col-sm-offset-2 text-right" onclick="getLogs('${activity.id}')" style="cursor:pointer;">审核追踪</p>
+                        </div>
+                        <#else>
+                        	<div class="form-group">
+                        		<p class="col-sm-4 col-sm-offset-8 text-right getLogs" onclick="getLogs('${activity.id}')">审核追踪</p>
+                    		</div>
+                    	</#if>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="${base}js/modules/audit/pub.js"></script>
+<script src="${base}js/modules/activityManagement/pub.js"></script>
+<script>
+<#if activity??>
+	var awardListHtml = '',
+		mrHtml = '';
+	$('#auditForm input[name="wxActivityId"]').val('${activity.id!""}');
+	$('#auditForm input[name="auditorEcmId"]').val(globalEcmId);
+	$('#auditForm input[name="ecmId"]').val('${activity.ecmId!""}');
+	$('#auditForm p[name="name"]').html('${activity.name!""}');
+	$('#auditForm p[name="creatorUsername"]').html('${activity.creator.ecm.name!""}');
+	$('#auditForm p[name="setDate"]').html('${activity.startTime?number_to_date} - ${activity.endTime?number_to_date}');
+	$('#auditForm p[name="description"]').html('${activity.description!""}');
+	<#list activity.awardList as award>
+		awardListHtml += '<p>${award.awardInfo.name!""}' + '&nbsp;&nbsp;奖品数量：${award.totalCount!""}' + '&nbsp;&nbsp;中奖率：${award.probability!""}'  + '%' + '</p>';
+	</#list>
+	$('#auditForm div[name="awardList"]').html(awardListHtml);
+	<#list activity.mrList as mr>
+		mrHtml += '<p>${mr.receiveSN!""}</p>';
+	</#list>
+	$('#auditForm div[name="mrList"]').html(mrHtml);
+<#else>	
+	layer.msg('获取数据失败',{icon: 5,time:1000});
+	setTimeout(function(){
+		history.go(-1);
+	},1000)
+</#if>
+	
+	$("#auditForm").validate({
+		rules: {
+			remark: {
+		        rangelength: [1,200]
+		    }
+		},
+		messages: {
+			remark: {
+		        rangelength: icon + "审核建议的长度不能超过200字",
+		    }
+		},
+		submitHandler: function(){
+			var type = $($(this)[0].submitButton).attr('data-type'),
+				msg = '确认审核通过？';
+			if(type == '-1'){
+				msg = '确认驳回活动？';
+			} 
+			layer.alert(msg,{
+				closeBtn: 1
+			},
+			function(){
+    			layer.close(loading);
+    			audit(type);
+			});
+		}
+	});
+
+
+//审核 Type 1：通过  -1：驳回	
+ function audit(type){
+		var submitObj = $('#auditForm').serializeObject(),
+			params = {
+				ecmId:submitObj.ecmId
+			},
+			option = {
+				url: basePath +'audit/audit',
+				type:'POST'
+			};
+		submitObj.auditor = JSON.parse(localStorage.wxbasePerson);
+		submitObj.result = type;
+		params.auditLog = JSON.stringify(submitObj);
+		option.data = params;
+		ajaxRequest(option, function(result){
+			if((typeof result) == 'string') {
+				result = JSON.parse(result);
+			}
+			if(result.success){
+				layer.msg('审核成功', {icon: 6});
+				goPage('index');
+				console.log('审核成功')
+			} else {
+				console.log('失败')
+				layer.msg(result.message?'审核失败,失败原因：'+result.message:'审核失败', {icon: 5});
+			}
+		})
+	}
+	
+	function getMrList(id,ecmId){
+		var option = {
+				url:basePath +'activityManagement/info',
+				data:{
+					id:id,
+					ecmId:ecmId
+				}
+			};
+		if(id && id!=''){
+			ajaxRequest(option, function(result){
+				if((typeof result) == 'string') {
+					result = JSON.parse(result);
+				}
+				if(result.success){
+					showMrlist(result.result.receiveList,'showMrList')
+				} else {
+					layer.msg(result.message?result.message:'查询数据失败', {icon: 5});
+				}
+			})
+		}
+	}
+
+
+</script>

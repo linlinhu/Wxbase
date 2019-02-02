@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit">
+    <title>银玺·微信基础支撑服务</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+	
+    <!--[if lt IE 8]>
+    <script>
+        alert('H+已不支持IE6-8，请使用谷歌、火狐等浏览器\n或360、QQ等国产浏览器的极速模式浏览本页面！');
+    </script>
+    <![endif]-->
+    <link href="${base}css/plugins/ztree/metroStyle/zTreeStyle.css" rel="stylesheet">
+	<link href="${base}img/favicon.ico" rel="shortcut icon">
+    <link href="${base}css/bootstrap.min.css?v=3.4.0" rel="stylesheet">
+    <link href="${base}css/font-awesome.min.css?v=4.3.0" rel="stylesheet">
+    <link href="${base}css/animate.css" rel="stylesheet">
+    <link href="${base}css/style.css" rel="stylesheet">
+    <link href="${base}css/index.css" rel="stylesheet">
+    <link href="${base}css/plugins/footable/footable.core.css" rel="stylesheet">
+    <link href="${base}css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="${base}css/plugins/periodsPicker/periodsPicker.css" rel="stylesheet">
+    <link href="${base}js/plugins/layui/css/layui.css" rel="stylesheet">
+    <link href="${base}js/plugins/layer/laydate/theme/default/laydate.css" rel="stylesheet">
+    <script src="${base}js/plugins/layer/laydate/laydate.js"></script>
+    
+    <link href="${base}css/plugins/chosen/chosen.css" rel="stylesheet">
+    <link href="${base}css/plugins/steps/jquery.steps.css" rel="stylesheet">
+    <link href="${base}css/plugins/switchery/switchery.css" rel="stylesheet">
+    <link href="${base}css/plugins/webuploader/webuploader.css" rel="stylesheet" type="text/css">
+    
+    <link href="${base}css/plugins/labels/labels.css" rel="stylesheet">
+    <link href="${base}css/plugins/blueimp/blueimp-gallery.css" rel="stylesheet">
+    <link href="${base}css/plugins/editable-select/jquery-editable-select.css">
+	<link rel="stylesheet" type="text/css" href="${base}/css/modules/wxArticle/index.css" />
+    
+</head>
+<body class="fixed-sidebar full-height-layout gray-bg">
+	<div class="fixed-loading" style="position: fixed;left: 0;top: 0;right: 0;bottom: 0;z-index:9999"></div>
+    <div id="wrapper">
+        <!--左侧导航开始-->
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="nav-close"><i class="fa fa-times-circle"></i>
+            </div>
+            <div class="sidebar-collapse">
+                <ul class="nav" id="side-menu">
+                <li class="nav-header">
+                        <div class="dropdown profile-element text-center">
+                       
+                            <span><img alt="image" class="img-circle" id="personHeadPortrait" style="height:64px;width:64px;"/></span>
+                            <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                               <span class="clear">
+                               <span class="block m-t-xs"><strong class="font-bold" id="personNickName"></strong></span>
+                                <span class="text-muted text-xs block"></span>
+                                </span>
+                            </a>
+                        </div>
+                        <div class="logo-element"><img src="img/logo-1.png" width="30" height="30"></div>
+                    </li>
+                    <li>
+                        <a class="J_menuItem" href="wxoa">
+                            <i class="fa fa-diamond"></i> 
+                            <span class="nav-label">公众号管理</span>
+                        </a>
+                    </li>
+                    <li>
+                   		<a href="#">
+                            <i class="fa fa-cube"></i>
+                            <span class="nav-label">基础服务</span>
+                            <span class="fa arrow"></span>
+                        </a>
+                        <ul class="nav nav-second-level">
+                            <li><a class="J_menuItem" href="wxArticle">图文管理</a></li>
+                            <li><a class="J_menuItem" href="wxMenu">菜单管理</a></li>
+                            <li><a class="J_menuItem" href="keyReply">关键字回复</a></li>
+                            <li><a class="J_menuItem" href="eventReply">事件回复</a></li>
+                            <li><a class="J_menuItem" href="fans">粉丝管理</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                   		<a href="#">
+                            <i class="fa fa-yelp"></i>
+                            <span class="nav-label">活动相关</span>
+                            <span class="fa arrow"></span>
+                        </a>
+                        <ul class="nav nav-second-level">
+                            <li><a class="J_menuItem" href="activityManagement">活动管理</a></li>
+                            <li><a class="J_menuItem" href="audit">活动审核</a></li>
+                            <li><a class="J_menuItem" href="awardRecord">中奖及兑奖记录</a></li>
+                            <li><a class="J_menuItem" href="consume">核销记录</a></li>
+                            <li><a class="J_menuItem" href="award">奖品管理</a></li>
+                            <li><a class="J_menuItem" href="coupon">优惠券管理</a></li>
+                            <li><a class="J_menuItem" href="activityConf">活动配置</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <!--左侧导航结束-->
+
+        <!--右侧部分开始-->
+        <div id="page-wrapper" class="gray-bg dashbard-1">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                    	<a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i></a>
+                    </div>
+                    <ul class="nav navbar-top-links navbar-right">
+	                    <li class="program-title">
+	                    	<img src="img/logo-1.png">&nbsp;银玺·微信基础支撑服务
+	                    </li>
+	                    <li class="hidden-xs">
+	                        <a class="logout" >登出&nbsp;<i class="fa fa-sign-out"></i></a>
+	                    </li>
+	                </ul>
+                </nav>
+               
+            </div>
+            <div class="row content-tabs">
+                <button class="roll-nav roll-left J_tabLeft"><i class="fa fa-backward"></i>
+                </button>
+                <nav class="page-tabs J_menuTabs">
+                    <div class="page-tabs-content">
+                    </div>
+                </nav>
+                <button class="roll-nav roll-right J_tabRight" style="right:80px"><i class="fa fa-forward"></i></button>
+                <div class="btn-group roll-nav roll-right" style="right:0">
+                    <button class="dropdown J_tabClose"  data-toggle="dropdown">关闭&nbsp;<span class="caret"></span></button>
+                    <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                        <li class="J_tabCloseAll"><a>关闭全部</a> </li>
+                        <li class="divider"></li>
+                        <li class="J_tabCloseOther"><a>关闭其他</a></li>
+                    </ul>
+                </div>   
+            </div>
+            <div class="row J_mainContent" id="content-main">
+            </div>
+            <div class="footer">
+                <!-- <div class="pull-right">&copy; ${title}</div> -->
+                <div class="pull-right">Copyright &copy; 2010-2015,www.emininfo.com,All rights reserved  蜀ICP备16033956号</div>
+            </div>
+        </div>
+		<#include "tpls/fileUploaderTpl.html"/>
+		<#include "tpls/articlesConfigTpl.html"/>
+		<#include "tpls/ActivityMAnagementTpl.html"/>
+		<#include "tpls/auditTpl.html"/>
+		
+    </div>
+    <!-- 全局js -->
+    <script src="${base}js/jquery-2.1.1.min.js"></script>
+    <script src="${base}js/jquery.cityselect.js"></script>
+    <script src="${base}js/bootstrap.min.js?v=3.4.0"></script>
+    <script src="${base}js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="${base}js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="${base}js/plugins/layer/layer.min.js"></script>
+	<script src="${base}js/plugins/layui/layui.js" ></script>
+	<script type="text/javascript">
+		var base = "${base}";
+	</script>
+    <!-- 自定义js -->
+    <script src="${base}js/hplus.js?v=3.2.0"></script>
+    <script src="${base}js/contabs.js"></script>
+    <script src="${base}js/emin/common.js"></script>
+
+    <!-- 第三方插件 -->
+    <script src="${base}js/plugins/pace/pace.min.js"></script>
+    <script src="${base}js/plugins/footable/footable.all.min.js"></script>
+    <script src="${base}js/plugins/validate/jquery.validate.min.js"></script>
+    <script src="${base}js/plugins/validate/messages_zh.min.js"></script>
+    <script src="${base}js/plugins/validate/compatible_bootstrap.js"></script>
+    <script src="${base}js/plugins/validate/validate_method.js"></script>
+    <script src="${base}js/plugins/iCheck/icheck.min.js"></script>
+	<script src="${base}js/plugins/periodsPicker/periodsPicker.js" ></script>
+    <!-- CHOSEN -->
+    <script src="${base}js/plugins/chosen/chosen.jquery.js" ></script>
+    <!-- Steps -->
+    <script src="${base}js/plugins/steps/jquery.steps.min.js" ></script> 
+    <!-- Switchery -->
+    <script src="${base}js/plugins/switchery/switchery.js"></script>
+    <!-- ztree -->
+    <script src="${base}js/plugins/ztree/jquery.ztree.core.js"></script>
+	<script src="${base}js/plugins/ztree/jquery.ztree.excheck.js"></script>
+	<script src="${base}js/plugins/ztree/jquery.ztree.exedit.js"></script>
+	<script type="text/javascript" src="${base}js/plugins/webuploader/webuploader.js"></script>
+    <script type="text/javascript" src="${base}js/plugins/webuploader/upload.js"></script>
+    <script src="${base}js/plugins/labels/labels.js" ></script>
+    <!-- emin封装js -->
+    <script src="${base}js/emin/dataLoad.js"></script>
+    <script type="text/javascript" src="${base}js/emin/dataChosen.js"></script>
+    <script type="text/javascript" src="${base}js/emin/emin.ztree.js"></script>
+	<!-- blueimp -->
+	<script src="${base}js/plugins/blueimp/jquery.blueimp-gallery.js"></script>
+	<!-- editable-select -->
+	<script type="${base}js/plugins/editable-select/jquery-editable-select.js"></script>
+	
+</body>
+<script>
+	var icon = "<i class='fa fa-times-circle'></i> ",
+		basePath = '${base}',
+		personInfo = {};
+		
+	if (localStorage.wxbasePersonInfo) {
+		
+		personInfo = JSON.parse(localStorage.wxbasePersonInfo);
+		if(typeof  personInfo.portrait == 'string' &&  personInfo.portrait!=""){
+			 personInfo.portrait = JSON.parse(personInfo.portrait);
+		}
+		if (personInfo.portrait && personInfo.portrait.storage) {
+			$('#personHeadPortrait').attr('src', personInfo.portrait.storage[2].fileStorageUrl);
+		} else  {
+			$('#personHeadPortrait').attr('src', base + "img/male.png");
+		}
+
+		$('#personHeadPortrait').attr('onerror', 'this.src='+ base + 'img/male.png');
+		$('#personNickName').html(personInfo.username);
+	}
+	
+	$(".logout").click(function(){
+		layer.confirm('是否确定注销登录？', {
+		    btn: ['确定','取消']//按钮
+		  //  shade: true //不显示遮罩
+		}, function(){
+			$.ajax({
+				url:"${base}logout",
+				type:"get",
+				data:{
+					token:'1111'
+				},
+				success:function(data){
+					localStorage.removeItem('wxbaseToken');
+					window.location.replace("/login");
+					 
+				} 
+			})
+		   
+		}, function(){
+		});
+	})
+	
+	
+	//监听加载状态改变
+	document.onreadystatechange = completeLoading;
+	
+	//加载状态为complete时移除loading效果
+	function completeLoading() {
+	  if (document.readyState == "complete") {
+			$('.fixed-loading').addClass('hide');
+			
+	  }
+	}
+</script>
+</html>

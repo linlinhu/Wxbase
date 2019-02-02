@@ -1,0 +1,199 @@
+
+<!-- 图文信息配置 -->
+<div class="wa-reply-config-wrap hide" id="wxArticlesReplyConfig-Panel">
+	<div class="show-area" id="configedArticles-view"></div>
+	<script id="configedArticlesTPL" type="text/html">
+		{{# if(d && (d.first || d.subs.length > 0)) { }}
+		<ul class="walist reply-view">
+		{{# if(d.first) { }}
+		<li class="type_{{d.first.size}}">
+			<div class="wa-title">{{d.first.title}}</div>
+			<img class="wa-img" src="{{d.first.picUrl}}"/>
+		</li>
+		{{# } }}
+		{{# if(d.subs && d.subs.length > 0) { }}
+		{{# layui.each(d.subs, function(index, item){ }}
+		<li class="type_{{item.size}}">
+			<div class="wa-title">{{item.title}}</div>
+			<img class="wa-img" src="{{item.picUrl}}"/>
+		</li>
+		{{# });}}
+		{{# } }}
+		</ul>
+		<div class="text-center" style="margin-top: 15px">
+			<button class="btn btn-defult btn-circle btn-lg" title="重置" alt="重置"><i class="fa fa-refresh"></i></button>
+		</div>
+		{{# } else {  }}
+			选择左侧图文信息进行配置
+		{{# } }}
+	</script>
+	<i class="separation-line"></i>
+	<div class="choose-area" id="wxArticlesReplyConfig-view"></div>
+	<script id="wxArticlesReplyConfigTPL" type="text/html">
+		{{# if(d && d.resultList && d.resultList.length > 0) { }}
+		<ul class="walist">
+		{{# layui.each(d.resultList, function(index, item){  var selected = '';}}
+
+		{{# layui.each(d.configedArticles, function(kraIndex, kra){ }}
+		{{# if(item.id == kra.id) { selected = 'selected'} }}
+		{{# });}}
+		<li class="type_{{item.size}} {{selected}}" data-id="{{item.id}}" data-obj='{"id":"{{item.id}}", "title": "{{item.title}}", "size":"{{item.size}}", "picUrl":"{{item.picUrl}}"}'>
+			<div class="wa-title">{{item.title}}</div>
+			<img class="wa-img" src="{{item.picUrl}}"/>
+	        <div class="wa-opers">
+	        	<i class="fa fa-check"></i>
+	        </div>
+		</li>
+		{{# });}}
+		</ul>
+		<div id="wxArticlesReplyConfigPage" style="padding: 8px 15px;background: #fff;text-align: right;margin: 0 20px 0 10px;"></div>
+		{{# } else { }}
+			当前公众号暂无图文信息可使用，请先去添加图文信息吧！
+		{{# } }}
+	</script>
+</div>
+
+<script>
+function openArticlesReplyConfigPanel(p, callback) {
+	var woaId = p.woaId,
+		pageArticles = null,
+		configedArticles = {
+			first: null,
+			subs: []
+		},
+		renderConfigedArticles = function() {
+			var tpl = configedArticlesTPL.innerHTML,
+				view = $('#configedArticles-view');
+			
+			laytpl(tpl).render(configedArticles, function(html){
+				view.html(html);
+				$('#configedArticles-view button').click(function(){
+					configedArticles = {
+							first: null,//首图
+							subs: [] //小图
+					};
+					$('#wxArticlesReplyConfig-view>ul').find('li.selected').removeClass('selected');
+					renderConfigedArticles();
+					callback('reset');
+				});
+			})
+		},
+		renderArticles = function(data) {
+			var tpl = wxArticlesReplyConfigTPL.innerHTML,//数据模板
+				view = $('#wxArticlesReplyConfig-view'),
+				renderDatas = data.result,
+				totalPage = renderDatas.totalPageNum,
+				totalCount = renderDatas.totalCount,
+				cur = renderDatas.currentPage,
+				limit = renderDatas.limit,
+				selectedArticles = [];
+			
+			if (configedArticles.first) {
+				selectedArticles.push(configedArticles.first);
+			}
+			if (configedArticles.subs.length > 0) {
+				for (i = 0; i < configedArticles.subs.length; i++) {
+					selectedArticles.push(configedArticles.subs[i]);
+				}
+			}
+			renderDatas.configedArticles = selectedArticles;
+			
+			laytpl(tpl).render(renderDatas, function(html){
+				view.html(html);
+				$('#wxArticlesReplyConfig-view li').bind('click', function() {
+					var obj = JSON.parse($(this).attr('data-obj'));
+					
+					if (!$(this).hasClass('selected')) {
+						if (obj.size == 1) {
+							if (configedArticles.first) {
+								$($('#wxArticlesReplyConfig-view>ul').find('li[data-id="' + configedArticles.first.id + '"]')[0]).removeClass('selected');
+							}
+							configedArticles.first = obj;
+						} else {
+							if (configedArticles.subs.length == 7) {
+								return false;
+							}
+							configedArticles.subs.push(obj);
+						}
+						
+						$(this).addClass('selected');
+					} else {
+						if (obj.size == 2) {
+							var subs = configedArticles.subs;
+							for (i = 0; i < subs.length; i++) {
+								if (subs[i].id == obj.id) {
+									subs.splice(i, 1);
+								}
+							}
+							configedArticles.subs = subs;
+						} else {
+							configedArticles.first = null;
+						}
+						$(this).removeClass('selected');
+						
+					}
+					renderConfigedArticles();
+				});
+				if(totalPage > 0) {
+					pageList({
+						modelName: 'wxArticlesReplyConfig',
+						totalCount: totalCount,
+						limit: limit,
+						curr: cur
+					}, function(obj) {
+						pageArticles(obj.curr, obj.limit);
+					})
+				}
+			});
+		},
+		capIndex = null;
+	
+	if (!woaId) {
+		return false;
+	}
+
+	pageArticles = function(cur, limit) {
+		ajaxRequest({
+			url: base + 'wxArticle/getPage',
+			data: {
+				limit: limit, // 默认每页展示10个
+				page: cur, 
+				woaId: woaId
+			}
+		}, function(data) {
+			if (typeof data == 'string') {
+				data = JSON.parse(data);
+			}
+			if (!data.success){
+				layer.msg('图文信息加载失败！' + data.message ? '原因可能是：' + data.message : '', {icon: 5});
+			} else {
+				renderArticles(data);
+			}
+		});
+	}
+	
+	pageArticles(1, 10);
+	renderConfigedArticles();
+	
+	$('#wxArticlesReplyConfig-Panel').removeClass('hide');
+	capIndex = layer.open({
+		type : 1,
+		title : '图文信息选择(一个大图和最多7个小图组成)',
+		area : [ '100%', '100%' ], //宽高
+		content : $('#wxArticlesReplyConfig-Panel'),
+		skin: 'gray-bg',
+		btn : [ '确定'],
+		yes: function(lindex, layero) {
+			if (!configedArticles.first) {
+				layer.msg('必须配置一个大图，请选择配置！', {icon: 5});
+				return false;
+			}
+			callback('configed', configedArticles);
+			layer.close(lindex);
+			
+		}
+	});
+	layer.full(capIndex);
+	
+}
+</script>

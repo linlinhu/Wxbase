@@ -1,0 +1,152 @@
+<div class="wrapper-content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>
+                    	微信公众号信息-
+                    <#if wxoa??>
+                    	编辑
+                    <#else>
+                    	添加
+                    </#if>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="btn btn-white btn-bitbucket btn-xs" href="javascript: goPage('index?limit=8')">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+               		 <form method="get" class="form-horizontal" id="wxoaForm">
+			            <input type="hidden" name="id">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">企业名称</label>
+                            <div class="col-sm-10">
+			                    <input class="form-control" type="text" name="companyName">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">微信号</label>
+                            <div class="col-sm-10">
+			                    <input class="form-control" type="text" name="companyCode">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">类型</label>
+                            <div class="col-sm-10">
+								<select class="form-control" name="type">
+									<option value="1">订阅</option>
+									<option value="2">服务</option>
+									<option value="3">企业</option>
+									<option value="4">小程序</option>
+                            	</select>
+                            </div> 
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">appId</label>
+                            <div class="col-sm-10">
+								<input class="form-control" type="text" name="appId">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">appSecret</label>
+                            <div class="col-sm-10">
+								<input class="form-control" type="text" name="appSecret">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Token</label>
+                            <div class="col-sm-10">
+								<input class="form-control" type="text" name="token">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" type="submit">保存内容</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+	var icon = "<i class='fa fa-times-circle'></i> ",
+		loading = null;
+	
+	<#if wxoa??>
+	$('#wxoaForm input[name="id"]').val('${wxoa.id!""}');
+	$('#wxoaForm input[name="companyName"]').val('${wxoa.companyName!""}');
+	$('#wxoaForm input[name="companyCode"]').val('${wxoa.companyCode!""}');
+	$('#wxoaForm select[name="type"] option[value="${wxoa.type!""}"]').attr("selected",true);
+	$('#wxoaForm input[name="appId"]').val('${wxoa.appId!""}');
+	$('#wxoaForm input[name="appSecret"]').val('${wxoa.appSecret!""}');
+	$('#wxoaForm input[name="token"]').val('${wxoa.token!""}');
+	</#if>
+	
+	$("#wxoaForm").validate({
+        rules: {
+        	companyName: {
+                required: true,
+                rangelength: [1,50]
+            },
+            companyCode: {
+            	required: true
+            },
+            type: {
+                required: true
+            },
+            appId: {
+                required: true,
+                rangelength: [1,100]
+            },
+            appSecret: {
+                required: true,
+                rangelength: [1,100]
+            },
+            token: {
+                required: true,
+                rangelength: [1,50]
+            }
+        },
+        messages: {
+        	companyName: {
+                required: icon + "请输入企业名称",
+                rangelength: icon + "企业名称的输入长度必须介于1和50之间"
+            },
+            companyCode: {
+            	required: icon + "请输入微信号"
+            },
+            type: {
+                required: icon + "请选择类型"
+            },
+            appId: {
+                required: icon + "请输入appId",
+                rangelength: icon + "appId的输入长度必须介于1和100之间"
+            },
+            appSecret: {
+                required: icon + "请输入appSecret",
+                rangelength: icon + "appSecret的输入长度必须介于1和100之间"
+            },
+            token: {
+                required: icon + "请输入token",
+                rangelength: icon + "token的输入长度必须介于1和50之间"
+            }
+        },
+        submitHandler: function(){
+        	var submitObj = $('#wxoaForm').serializeObject();
+        	save({
+	                jsonStr: JSON.stringify(submitObj)
+	        }, 'wxoa')
+        }
+	});
+</script>

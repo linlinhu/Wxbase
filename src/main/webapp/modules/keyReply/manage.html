@@ -1,0 +1,133 @@
+<#setting datetime_format='yyyy-MM-dd HH:mm:ss'>
+<#setting date_format='yyyy-MM-dd'>
+<div class="wrapper-content">
+	<div class="row">
+		<div class="col-sm-12">
+		    <div class="ibox float-e-margins">
+		        <div class="ibox-title">
+		            <h5>关键字回复管理</h5>
+		            <div class="ibox-tools">
+		                <a class="btn btn-primary" href="javascript:goKeyReplyForm()" alt="添加关键字回复" title="添加关键字回复">
+		                    <i class="fa fa-plus"></i>
+		                </a>
+		            </div>
+		        </div>
+		        <div class="ibox-content" >
+		        	<form method="get" id="keyReplySearchForm">
+			        	<div class="filter-line">
+							<input type="hidden" name="page">
+			        		<div class="lft-sep">
+								<div class="syllabel">公众号选择查询：</div>
+								<select class="form-control" id="keyReplyWoaId" name="woaId" onchange="pageSearchKeyReply()">
+								<#list woaList as w>
+								<option value="${w.id}">${w.companyName}</option>
+				     			</#list>
+								</select>
+							</div>
+							<input placeholder="关键字查询" class="form-control" type="text" name="keyword" value="${keyword!''}" role="user-params">
+							<button type="button" class="btn btn-primary" role="submit"><i class="fa fa-search"></i></button>
+	                        <button type="button" class="btn btn-default reset" role="reset"><i class="fa fa-refresh"></i></button>
+		                </div>
+	                </form>
+		            <table class="footable table table-stripped toggle-arrow-tiny" id="keyReplyTable" data-page-size="${page.limit!10}" data-paging="false">
+		                <thead>
+	                        <tr>
+	                            <th data-toggle="true">关键字</th>
+	                            <th>回复描述</th>
+	                            <th>回复类型</th>
+	                            <th data-hide="all">回复内容</th>
+	                            <th>作为提示项</th>
+	                            <th data-sort-ignore="true">操作</th>
+	                        </tr>
+	                    </thead>
+	                    <tbody>
+	        				<#if page?? && page.totalCount gt 0>
+	                    	<#list page.resultList as d>
+	                    		<tr>
+	                    			<td>${d.keyword}</td>
+		                        	<td>${d.remark}</td>
+		                        	<td><#if d.replyType =='text'>文本<#else>图文</#if></td>
+		                        	<td>
+		                        	<#if d.replyType =='text'>
+		                        	${d.content}
+		                        	<#else>
+		                        	<#if d.articles?? && d.articles?size gt 0>
+		                        		<div class="articles-show">
+		        						<ul class="walist reply-view">
+		                        		<#list d.articles as a>
+							        		<li class="type_${a.size}">
+										      <div class="wa-title">${a.title}</div>
+										      <img class="wa-img" src="${a.picUrl}"/>
+										    </li>
+							        	</#list>
+		                        		</ul>
+		                        		</div>
+		                        	<#else>
+		                        	-
+		                        	</#if>
+		                        	</#if>
+		                        	</td>
+		                        	<td>
+		                        		<#if d.preferences>
+		                        			是
+		                        		<#else>
+		                        			否
+		                        		</#if>
+		                        	</td>
+		                        	<td>
+	                        		<a href="javascript: goKeyReplyForm('${d.woaId}','${d.id}')" alt="编辑" title="编辑"><i class="fa fa-pencil text-navy">&nbsp;</i></a>&nbsp;
+                                    <a href="javascript: remove('${d.id}', 'keyReply');" alt="删除" title="删除"><i class="fa fa-trash text-navy">&nbsp;</i></a>&nbsp;
+		                        	</td>
+	                        	</tr>
+							</#list>
+	                        <#else>
+	                        <tr>
+	                        	<td colspan="6">暂无数据</td>
+	                        </tr>
+	                        </#if>
+	                    </tbody>
+		            </table>
+				    <div class="text-right" id="keyReplyPage"></div>
+		        </div>
+		    </div>
+		</div>
+	</div>
+</div>
+<script>
+
+<#if woaId??>
+	$('#keyReplySearchForm select[name = "woaId"]').val('${woaId}');
+</#if>
+<#if page??>
+initTable({
+	modelName: 'keyReply',
+	curr: '${page.currentPage!1}',
+	totalPage: '${page.totalPageNum!1}',
+	totalCount: '${page.totalCount!1}',
+	limit: '${page.limit!10}'
+});
+</#if>
+
+function pageSearchKeyReply() {
+	var woaId = $('#keyReplyWoaId').val();
+	goPage('index', {
+		woaId: woaId,
+		limit: 10
+	})
+}
+function goKeyReplyForm(woaId, id) {
+	var wxoaId = woaId ? woaId : $('#keyReplyWoaId').val(),
+		params = {
+			woaId: wxoaId
+		};
+		
+	if (id) {
+		params.id = id;
+	}
+	if (params.woaId) {
+		goPage('form', params);
+	} else {
+		layer.msg('公众号信息缺失，请先选择/添加微信公众号！', {icon: 5})
+	}
+}
+</script>

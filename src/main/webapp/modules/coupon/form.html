@@ -1,0 +1,289 @@
+<style>
+.avaliableDays {
+	
+}
+#couponForm .left {
+	float:left!important;
+}
+#couponForm select {
+	width:30%!important;
+	margin:0 10px;
+}
+#couponForm span {
+	padding-top:8px;
+}
+#couponForm input[name="amount"] {
+	width:95%;
+}
+.yuan {
+	display: inline-block;
+	width:5%;
+	height:34px;
+	text-align:center;
+}
+#couponForm .pro-img,
+#couponForm .upload-img {
+	width:200px;
+}
+#couponForm .upload-img {
+	width:200px;
+}
+
+</style>
+<div class="wrapper-content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>
+                    	优惠券-
+                    <#if coupon??>
+                    	编辑
+                    <#else>
+                    	添加
+                    </#if>
+                    </h5>
+                    <div class="ibox-tools">
+                        <a class="btn btn-white btn-bitbucket btn-xs" href="javascript: goPage('index?limit=8')">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+               		 <form method="get" class="form-horizontal" id="couponForm">
+               		 	<input type="hidden" name="id">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">优惠券名称</label>
+                            <div class="col-sm-10">
+								<input class="form-control" type="text" name="name">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">奖品图片</label>
+                            <div class="col-sm-10">
+                            	<div class="upload-input">
+                            		<input class="form-control" type="hidden" name="picUrls">
+                            		<i class="fa fa-plus text-navy" onclick="uploadcouponImgResources()"></i>
+                            		<p class="upload-tips">建议上传长宽比例为2:1的图片</p>
+                            	</div>
+								<div class="upload-img hide">
+									<img class="pro-img"/>
+									<span class="removeImg"><i class="fa fa-times"></i></span>
+								</div>
+                            </div> 
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">减免金额</label>
+                            <div class="col-sm-10">
+                            	<input class="form-control left" type="text" name="amount"><span class="left yuan">元</span><br>
+                            </div> 
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group avaliableDays">
+                            <label class="col-sm-2 control-label">有效期</label>
+                            <div class="col-sm-10">
+                            	<span class="left">领取后</span>
+	                            <select class="form-control left" name="onsetDay">
+	                            	<option value="0">即时</option>
+	                            	<option value="1">次日</option>
+	                            </select>
+	                            <span class="left">生效，有效天数</span>
+	                            <select class="form-control left" name="avaliableDays">
+	                            </select>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <button class="btn btn-primary" type="submit">保存内容</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script id="couponUnitDatas" type="text/html">
+	{{# if(d.result.length > 0) { }}
+		<option value=""></option>
+	{{# layui.each(d.result, function(index, item){ }}
+		<option value="{{item.name}}">{{item.name}}</option>			
+	{{# }); }}
+	{{# } }}
+</script>
+<script>
+<#if coupon??>
+	var  onsetDayHtml = '',
+		avaliableDaysHtml = '';
+	$('#couponForm input[name="id"]').val('${coupon.id!""}');
+	$('#couponForm input[name="name"]').val('${coupon.name!""}');
+	
+	$('#couponForm input[name="amount"]').val('${(coupon.amount?c)}' / 100);
+	
+	if(${coupon.onsetDay} == 0){
+		onsetDayHtml = '<option value="0" selected>即时</option>'+
+						'<option value="1">次日</option>'
+	} else {
+		onsetDayHtml = '<option value="0">即时</option>'+
+						'<option value="1" selected>次日</option>'
+	}
+	$('#couponForm select[name="onsetDay"]').html(onsetDayHtml);
+	
+	for(var i = 30; i >= 15; i--) {
+		if (${coupon.avaliableDays} == i){
+			avaliableDaysHtml += '<option value="'+ i +'" selected>'+i+'天</option>'
+		}else{
+			avaliableDaysHtml += '<option value="'+ i +'">'+i+'天</option>'
+		}	
+	}
+	$('#couponForm select[name="avaliableDays"]').html(avaliableDaysHtml)
+	
+	<#if coupon.picUrls?? && coupon.picUrls.storage?? && coupon.picUrls.storage?size gt 0>
+		
+		var  temp = {
+			originalName:'${coupon.picUrls.originalName}',
+			originalMimeType:'${coupon.picUrls.originalMimeType}',
+			originalSize:'${coupon.picUrls.originalName}',
+			originalContentType:'${coupon.picUrls.originalContentType}',
+			storage:[]
+		}
+		<#list coupon.picUrls.storage as d>
+		temp.storage.push({
+			imgQualityType:'${d.imgQualityType}',
+			fileStorageUrl:'${d.fileStorageUrl}',
+			available:'${d.available}',
+			destinationStorageHost:'${d.destinationStorageHost}',
+			fileId:'${d.fileId}'
+		})
+		</#list>
+		
+		showUploadImg(temp,'#couponForm');
+	</#if>
+<#else>
+	var avaliableDaysHtml = '';
+	for(var i = 30; i >= 15; i--) {
+		avaliableDaysHtml += '<option value="'+ i +'">'+i+'天</option>'
+	}
+	$('#couponForm select[name="avaliableDays"]').html(avaliableDaysHtml)
+</#if>
+
+$("#couponForm").validate({
+	rules: {
+		name: {
+	        required: true,
+	        rangelength: [2,30],
+	        isName:true
+	    },
+	    picUrls: {
+	    	required: true
+	    },
+	    amount: {
+	    	required: true,
+	    	rangelength: [1,7],
+	    	dot:true,
+	    	notZero:true
+	    },
+	    onsetDay: {
+	    	required: true
+	    },
+	    avaliableDays:{
+	    	required: true
+	    }
+	},
+	messages: {
+		name: {
+	        required: icon + "请输入优惠券名称",
+	        rangelength: icon + "优惠券名称的长度介于2-30个合法字符之间",
+	        isName: icon + "不能以空格开始或结尾"
+	    },
+	    picUrls: {
+	    	 required: icon + "请上传图片",
+	    },
+	    amount: {
+	    	 required: icon + "请输入减免金额",
+	    	 dot: icon + "减免金额不能超过两位小数",
+	    	 rangelength: icon + "减免金额的输入长度不能超过7个合法字符",
+	    	 notZero: icon + "减免金额不能为0"
+	    },
+	    onsetDay: {
+	        required: icon + "请选择开始生效时间"
+	    },
+	    avaliableDays:{
+	    	required: icon + "请选择有效天数"
+	    }
+	},
+	submitHandler: function(){
+		var submitObj = $('#couponForm').serializeObject();
+		
+		submitObj.picUrls = JSON.parse(submitObj.picUrls);
+		submitObj.amount = submitObj.amount*100;
+		save({
+			jsonStr: JSON.stringify(submitObj)
+		}, 'coupon')
+	}
+});
+
+
+$('.removeImg').on('click',function(){
+	removeUploadImg('#couponForm')
+})
+
+
+function uploadcouponImgResources() {
+	var html =  '<div id="uploadInterface" style="z-index:999;">'+
+					'<div class="webuploader" id="couponImgResourcesUploader">'+
+						$('#webuploaderTPL').html() +
+				    '</div>'+
+				'</div>',
+		uploadPics = [];	
+				
+	layer.open({
+		type : 1,
+		title : '上传图片资源',
+		skin : 'layui-layer-rim', //加上边框
+		area : [ '60%', '450px' ], //宽高
+		content : '<div class="wrapper-content">' + html + '</div>',
+		btn : [ '确定'],
+		yes : function(lindex, layero) {
+			if (uploadPics.length == 0) {
+				layer.msg('请上传张图片后再点击此按钮', {icon: 5});
+				return false;
+			} else {
+				showUploadImg(uploadPics[0],'#couponForm')
+				
+				$('#couponForm input[name="picUrls"]').parent().parent().parent().removeClass('has-error');
+				$('#couponForm input[name="picUrls"]').parent().parent().parent().addClass('has-success');
+				layer.closeAll();
+			}
+			
+		}
+	});
+	
+	CUploadFiles({
+		uploaderId: 'couponImgResourcesUploader',
+		filesType: ['img'],
+		uploadUrl: '/file/upload.do',
+		fileNumLimit: 1
+	}, function(file, response){
+		if(response.success){
+			uploadPics.push(response.result);
+			
+		} else {
+			layer.msg(response.message?response.message:'上传失败', {icon: 5});
+		}
+		
+	})
+}
+
+jQuery.validator.addMethod("isName", function(value, element) {       
+    return this.optional(element) || /^\S.*\S$/.test(value);       
+}, "不能以空格开始或结尾");
+jQuery.validator.addMethod("dot", function(value, element) {       
+    return this.optional(element) || /^\d+(\.\d{1,2})?$/.test(value);       
+}, "不能超过两位小数");
+jQuery.validator.addMethod("notZero", function(value, element) {       
+    return this.optional(element) || /[1-9]/.test(value);       
+}, "不能超过两位小数");
+</script>

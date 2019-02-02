@@ -1,0 +1,53 @@
+.profile-element {
+	/* text-align: center; */
+}
+.help-block{
+	margin-top:0!important;
+}
+
+/*上传图片  begin*/
+.upload-img img,
+.upload-img {
+	width:100px;
+	height:100px;
+}
+.upload-img {
+	width:100px;
+	height:100px;
+}
+.upload-img {
+	position:relative;
+}
+.upload-img:hover span {
+	display:inline-block;
+}
+.upload-img span {
+	display:none;
+	position:absolute;
+	top:0;
+	right:0;
+	
+	padding-top:0px!important;
+	
+	width:16px;
+	height:16px;
+	
+	border-radius:100%;
+	
+	line-height:16px;
+	text-align:center;
+	
+	background:#ccc;
+	color:white;
+	cursor: pointer;
+}
+.upload-input i {
+		margin:10px 0 5px 0;
+		font-size:18px;
+		cursor: pointer;	
+	}
+.upload-tips {
+	font-size:10px;
+}
+/*上传图片 end*/
+
